@@ -6,7 +6,7 @@ servlet:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:8080/sns-db
+    url: jdbc:mysql://localhost:8080/healing-sns
     username: root
     password: root
   jpa:
@@ -17,3 +17,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
