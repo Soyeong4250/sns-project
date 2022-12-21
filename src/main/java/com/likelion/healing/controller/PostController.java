@@ -23,6 +23,9 @@ public class PostController {
     @PostMapping()
     public Response<PostAddRes> addPost(@RequestBody PostAddReq postAddReq, Authentication authentication) {
         log.info("title : {}, body : {}", postAddReq.getTitle(), postAddReq.getBody());
+        String userName = authentication.getName();
+        log.info("userName : {}", userName);
+        postService.addPost(postAddReq, userName);
         return Response.success(PostAddRes.builder().build());
     }
 }
