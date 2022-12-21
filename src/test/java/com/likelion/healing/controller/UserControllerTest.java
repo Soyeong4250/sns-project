@@ -98,4 +98,24 @@ class UserControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @WithMockUser
+    @DisplayName("로그인 실패 - 존재하지 않는 회원")
+    void notFoundUser() throws Exception {
+        UserLoginReq req = UserLoginReq.builder()
+                .userName("Soyeong")
+                .password("12345")
+                .build();
+
+        given(userService.login(any(UserLoginReq.class))).willThrow(new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", req.getUserName())));
+
+        mockMvc.perform(post("/api/v1/users/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(req)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.result.errorCode").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.result.message").value(req.getUserName() + "은(는) 없는 회원입니다."))
+                .andDo(print());
+    }
 }
