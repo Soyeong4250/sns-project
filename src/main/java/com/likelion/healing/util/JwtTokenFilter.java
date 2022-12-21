@@ -40,7 +40,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         try{
             token = authorizationHeader.split(" ")[1];
         }catch (Exception e) {
-            log.error("token 추출에 실패했습니다.. ", e);
+            log.error("token 추출에 실패했습니다. ", e);
             filterChain.doFilter(request, response);
             return;
         }
