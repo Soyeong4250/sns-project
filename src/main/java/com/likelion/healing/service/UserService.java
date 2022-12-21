@@ -7,8 +7,10 @@ import com.likelion.healing.domain.entity.User;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.UserRepository;
+import com.likelion.healing.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
+
+    @Value("secretKey")
+    private String secretKey;
+    private long expireTime = 1000L * 60 * 60;
 
     public UserJoinRes join(UserJoinReq userJoinReq) {
         log.info("userName: {}", userJoinReq.getUserName());
@@ -44,6 +50,6 @@ public class UserService {
             throw new HealingSnsAppException(ErrorCode.INVALID_PASSWORD, "회원 이름 또는 비밀번호를 다시 확인해주세요.");
         }
 
-        return "token";
+        return JwtTokenUtil.createToken(userLoginReq.getUserName(), secretKey, expireTime);
     }
 }
