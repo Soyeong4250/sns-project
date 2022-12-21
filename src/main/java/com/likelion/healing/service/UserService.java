@@ -2,6 +2,7 @@ package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.UserJoinReq;
 import com.likelion.healing.domain.dto.UserJoinRes;
+import com.likelion.healing.domain.entity.User;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.UserRepository;
@@ -22,7 +23,10 @@ public class UserService {
                 .ifPresent(user -> {
                     throw new HealingSnsAppException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s는 이미 있습니다.", userJoinReq.getUserName()));
                 });
-        // User user = userRepository.save(userJoinReq.toEntity());
-        return null;
+        User user = userRepository.save(userJoinReq.toEntity());
+        return UserJoinRes.builder()
+                .userId(user.getId())
+                .userName(user.getUserName())
+                .build();
     }
 }
