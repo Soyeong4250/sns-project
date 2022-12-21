@@ -29,4 +29,8 @@ public class JwtTokenUtil {
         Date expireDate = extractClaims(token, key).getExpiration();
         return expireDate.before(new Date());
     }
+
+    public static String getUserName(String token, String key) {
+        return extractClaims(token, key).get("userName", String.class);
+    }
 }
