@@ -2,6 +2,8 @@ package com.likelion.healing.controller;
 
 import com.likelion.healing.domain.dto.UserJoinReq;
 import com.likelion.healing.domain.dto.UserJoinRes;
+import com.likelion.healing.domain.dto.UserLoginReq;
+import com.likelion.healing.domain.dto.UserLoginRes;
 import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.service.UserService;
 import io.swagger.annotations.Api;
@@ -27,4 +29,9 @@ public class UserController {
         return Response.success(new UserJoinRes(userDto.getUserId(), userDto.getUserName()));
     }
 
+    @PostMapping("/login")
+    public Response<UserLoginRes> login(@RequestBody UserLoginReq userJoinReq) {
+        log.debug("login() 실행");
+        return Response.success(new UserLoginRes("로그인 token"));
+    }
 }
