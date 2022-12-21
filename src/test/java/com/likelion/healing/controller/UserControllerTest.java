@@ -118,4 +118,25 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.message").value(req.getUserName() + "은(는) 없는 회원입니다."))
                 .andDo(print());
     }
+
+    @Test
+    @WithMockUser
+    @DisplayName("로그인 실패 - 비밀번호가 일치하지 않는 경우")
+    void invalidPassword() throws Exception {
+        UserLoginReq req = UserLoginReq.builder()
+                .userName("Soyeong")
+                .password("12345")
+                .build();
+
+        given(userService.login(any(UserLoginReq.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PASSWORD, "회원 이름 또는 비밀번호를 다시 확인해주세요."));
+
+        mockMvc.perform(post("/api/v1/users/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(req)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PASSWORD"))
+                .andExpect(jsonPath("$.result.message").value("회원 이름 또는 비밀번호를 다시 확인해주세요."))
+                .andDo(print());
+    }
 }
