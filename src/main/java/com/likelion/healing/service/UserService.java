@@ -3,6 +3,7 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.UserJoinReq;
 import com.likelion.healing.domain.dto.UserJoinRes;
 import com.likelion.healing.domain.dto.UserLoginReq;
+import com.likelion.healing.domain.dto.UserLoginRes;
 import com.likelion.healing.domain.entity.User;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
@@ -40,7 +41,7 @@ public class UserService {
                 .build();
     }
 
-    public String login(UserLoginReq userLoginReq) {
+    public UserLoginRes login(UserLoginReq userLoginReq) {
         log.info("userName: {}", userLoginReq.getUserName());
 
         User user = userRepository.findByUserName(userLoginReq.getUserName())
@@ -50,6 +51,9 @@ public class UserService {
             throw new HealingSnsAppException(ErrorCode.INVALID_PASSWORD, "회원 이름 또는 비밀번호를 다시 확인해주세요.");
         }
 
-        return JwtTokenUtil.createToken(userLoginReq.getUserName(), secretKey, expireTime);
+        String token = JwtTokenUtil.createToken(userLoginReq.getUserName(), secretKey, expireTime);
+        return UserLoginRes.builder()
+                .jwt(token)
+                .build();
     }
 }
