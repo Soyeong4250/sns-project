@@ -12,7 +12,7 @@ public class ExceptionManager {
     @ExceptionHandler(HealingSnsAppException.class)
     public ResponseEntity<?> healingSnsAppExceptionHandler(HealingSnsAppException e) {
         return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(Response.error(e));
+                .body(Response.error(new ErrorResult(e.getErrorCode(), e.getMessage())));
     }
 
 }
