@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Response<UserLoginRes> login(@RequestBody UserLoginReq userJoinReq) {
+    public Response<UserLoginRes> login(@RequestBody UserLoginReq userLoginReq) {
         log.debug("login() 실행");
         return Response.success(new UserLoginRes("로그인 token"));
     }
