@@ -2,6 +2,7 @@ package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.UserJoinReq;
 import com.likelion.healing.domain.dto.UserJoinRes;
+import com.likelion.healing.domain.dto.UserLoginReq;
 import com.likelion.healing.domain.entity.User;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
@@ -31,5 +32,18 @@ public class UserService {
                 .userId(user.getId())
                 .userName(user.getUserName())
                 .build();
+    }
+
+    public String login(UserLoginReq userLoginReq) {
+        log.info("userName: {}", userLoginReq.getUserName());
+
+        User user = userRepository.findByUserName(userLoginReq.getUserName())
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s는 없는 회원입니다.", userLoginReq.getUserName())));
+
+        if(!encoder.matches(userLoginReq.getPassword(), user.getPassword())) {
+            throw new HealingSnsAppException(ErrorCode.INVALID_PASSWORD, "회원 이름 또는 비밀번호를 다시 확인해주세요.");
+        }
+
+        return "token";
     }
 }
