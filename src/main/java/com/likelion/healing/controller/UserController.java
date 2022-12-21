@@ -32,6 +32,7 @@ public class UserController {
         return Response.success(new UserJoinRes(userDto.getUserId(), userDto.getUserName()));
     }
 
+    @ApiOperation(value = "로그인", notes = "로그인 성공시 200과 token 발행, 회원이 존재하지 않을 경우 404에러, 비밀번호가 일치하지 않을 경우 401을 반환")
     @PostMapping("/login")
     public Response<UserLoginRes> login(@RequestBody UserLoginReq userLoginReq) {
         log.debug("login() 실행");
