@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Where(clause = "deleted_at == null")
+@Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Schema(description = "회원")
 public class User extends BaseEntity {
