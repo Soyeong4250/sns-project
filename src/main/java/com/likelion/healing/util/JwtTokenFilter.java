@@ -38,5 +38,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
+        if(JwtTokenUtil.isExpired(token, secretKey)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
     }
 }
