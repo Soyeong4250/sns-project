@@ -3,6 +3,8 @@ package com.likelion.healing.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.domain.dto.UserJoinReq;
 import com.likelion.healing.domain.dto.UserJoinRes;
+import com.likelion.healing.domain.dto.UserLoginReq;
+import com.likelion.healing.domain.dto.UserLoginRes;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.UserService;
@@ -74,6 +76,26 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsBytes(req)))
                 .andDo(print())
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("로그인 성공")
+    void successfulLogin() throws Exception {
+        UserLoginReq req = UserLoginReq.builder()
+                .userName("Soyeong")
+                .password("12345")
+                .build();
+
+        given(userService.login(any(UserLoginReq.class))).willReturn(new UserLoginRes("token"));
+
+        mockMvc.perform(post("/api/v1/users/login")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.jwt").exists())
+                .andDo(print());
     }
 
 }
