@@ -8,6 +8,7 @@ import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder encoder;
 
     public UserJoinRes join(UserJoinReq userJoinReq) {
         log.info("userName: {}", userJoinReq.getUserName());
@@ -23,7 +25,8 @@ public class UserService {
                 .ifPresent(user -> {
                     throw new HealingSnsAppException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s는 이미 있습니다.", userJoinReq.getUserName()));
                 });
-        User user = userRepository.save(userJoinReq.toEntity());
+
+        User user = userRepository.save(userJoinReq.toEntity(encoder.encode(userJoinReq.getPassword())));
         return UserJoinRes.builder()
                 .userId(user.getId())
                 .userName(user.getUserName())
