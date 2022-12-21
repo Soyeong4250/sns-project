@@ -19,7 +19,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @ApiOperation(value = "회원가입", notes = "중복된 회원이 없는 경우 200와 결과(userId, userName), 중복된 회원이 있는 경우 409와 결과를 반환")
+    @ApiOperation(value = "회원가입", notes = "중복된 회원이 없는 경우 200와 결과(userId, userName), 중복된 회원이 있는 경우 409와 결과(errorCode, message)를 반환")
     @PostMapping("/join")
     public Response<UserJoinRes> join(@RequestBody UserJoinReq userJoinReq) {
         log.debug("join() 실행");

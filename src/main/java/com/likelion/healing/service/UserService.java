@@ -23,7 +23,7 @@ public class UserService {
         log.info("userName: {}", userJoinReq.getUserName());
         userRepository.findByUserName(userJoinReq.getUserName())
                 .ifPresent(user -> {
-                    throw new HealingSnsAppException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s는 이미 있습니다.", userJoinReq.getUserName()));
+                    throw new HealingSnsAppException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s은(는) 이미 있습니다.", userJoinReq.getUserName()));
                 });
 
         User user = userRepository.save(userJoinReq.toEntity(encoder.encode(userJoinReq.getPassword())));
