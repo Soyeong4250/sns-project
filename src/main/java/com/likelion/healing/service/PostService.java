@@ -2,6 +2,7 @@ package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.PostAddReq;
 import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
 import com.likelion.healing.domain.entity.User;
 import com.likelion.healing.exception.ErrorCode;
@@ -10,6 +11,8 @@ import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,5 +37,10 @@ public class PostService {
                 .postId(savedPost.getId())
                 .message("포스트 등록 완료")
                 .build();
+    }
+
+    public Page<PostViewRes> getPostList(Pageable pageable) {
+        Page<PostViewRes> postList = postRepository.findAllByOrderByCreatedAtDesc(pageable).map(PostViewRes::of);
+        return postList;
     }
 }
