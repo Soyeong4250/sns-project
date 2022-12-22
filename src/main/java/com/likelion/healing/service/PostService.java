@@ -43,4 +43,18 @@ public class PostService {
         Page<PostViewRes> postList = postRepository.findAllByOrderByCreatedAtDesc(pageable).map(PostViewRes::of);
         return postList;
     }
+
+    public PostViewRes getPostById(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        return PostViewRes.builder()
+                        .id(post.getId())
+                        .title(post.getTitle())
+                        .body(post.getBody())
+                        .userName(post.getUser().getUserName())
+                        .createdAt(post.getCreatedAt())
+                        .lastModifiedAt(post.getUpdatedAt())
+                        .build();
+    }
 }
