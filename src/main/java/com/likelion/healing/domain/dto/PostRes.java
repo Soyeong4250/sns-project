@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-public class PostAddRes {
+public class PostRes {
 
     private String message;
     private Integer postId;
