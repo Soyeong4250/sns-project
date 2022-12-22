@@ -31,6 +31,7 @@ class PostControllerTest {
 
     @MockBean
     PostService postService;
+    PostController postController;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -98,4 +99,28 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.errorCode").value("INVALID_TOKEN"))
                 .andExpect(jsonPath("$.result.message").value("잘못된 토큰입니다."));
     }
+
+    /*@Test
+    @DisplayName("포스트 전체 목록 - 생성일자 내림차순 조회 테스트")
+    void getPostList() throws Exception {
+        List<PostViewRes> postList = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            postList.add(new PostViewRes(i, "title" + i, "body" + i, "Soyeong", new Timestamp(System.currentTimeMillis())));
+        }
+        postList.stream().sorted(Comparator.comparing(PostViewRes::getCreatedAt).reversed());
+        Page<PostViewRes> postPage = listToPage(postList);
+
+        Mockito.when(postService.getPostList(any(Pageable.class))).thenReturn(postPage);
+
+
+        Response<Page<PostViewRes>> = postController.getPostList(Pageable);
+        Assertions.assertTrue(jsonPath("$.result.content[0].createdAt").comparejsonPath("$.result.content[1].createdAt"));
+    }
+
+    private Page<PostViewRes> listToPage(List<PostViewRes> postList) {
+        PageRequest pageRequest = PageRequest.of(1, 20);
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), postList.size());
+        return new PageImpl<>(postList.subList(start, end), pageRequest, postList.size());
+    }*/
 }
