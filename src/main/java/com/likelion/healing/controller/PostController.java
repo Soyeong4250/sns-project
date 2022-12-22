@@ -44,4 +44,10 @@ public class PostController {
         PostViewRes postRes = postService.getPostById(id);
         return Response.success(new PostViewRes(postRes.getId(), postRes.getTitle(), postRes.getBody(), postRes.getUserName(), postRes.getCreatedAt(), postRes.getLastModifiedAt()));
     }
+
+    @PostMapping("/{id}/edit")
+    public Response<PostViewRes> updatePostById(@PathVariable Integer id) {
+        log.info("postId : {}", id);
+        return Response.success(null);
+    }
 }
