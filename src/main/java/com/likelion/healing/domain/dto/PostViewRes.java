@@ -21,6 +21,8 @@ public class PostViewRes {
     private String userName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
     private Timestamp createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
+    private Timestamp lastModifiedAt;
 
     public static PostViewRes of(Post post) {
         return PostViewRes.builder()
@@ -29,6 +31,7 @@ public class PostViewRes {
                 .body(post.getBody())
                 .userName(post.getUser().getUserName())
                 .createdAt(post.getCreatedAt())
+                .lastModifiedAt(post.getUpdatedAt())
                 .build();
     }
 }
