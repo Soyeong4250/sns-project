@@ -1,7 +1,7 @@
 package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.PostAddReq;
-import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
 import com.likelion.healing.domain.entity.User;
@@ -23,7 +23,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public PostAddRes addPost(PostAddReq postAddReq, String userName) {
+    public PostRes addPost(PostAddReq postAddReq, String userName) {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
@@ -33,7 +33,7 @@ public class PostService {
                 .user(user)
                 .build();
         Post savedPost = postRepository.save(post);
-        return PostAddRes.builder()
+        return PostRes.builder()
                 .postId(savedPost.getId())
                 .message("포스트 등록 완료")
                 .build();

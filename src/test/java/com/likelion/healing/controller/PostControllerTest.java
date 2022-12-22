@@ -2,7 +2,7 @@ package com.likelion.healing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.domain.dto.PostAddReq;
-import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
@@ -49,7 +49,7 @@ class PostControllerTest {
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostAddReq.class), "Bearer " + any(String.class))).willReturn(new PostAddRes("포스트 등록 완료", 1));
+        given(postService.addPost(any(PostAddReq.class), "Bearer " + any(String.class))).willReturn(new PostRes("포스트 등록 완료", 1));
 
         mockMvc.perform(post("/api/v1/posts")
                 .with(csrf())

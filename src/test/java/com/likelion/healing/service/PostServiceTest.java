@@ -1,7 +1,7 @@
 package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.PostAddReq;
-import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
 import com.likelion.healing.domain.entity.User;
@@ -48,11 +48,11 @@ class PostServiceTest {
                 .thenReturn(givenPost);
 
 
-        PostAddRes postAddRes = postService.addPost(
+        PostRes postRes = postService.addPost(
                 new PostAddReq("title1", "body1"), givenUser.getUserName());
 
-        Assertions.assertEquals(1, postAddRes.getPostId());
-        Assertions.assertEquals("포스트 등록 완료", postAddRes.getMessage());
+        Assertions.assertEquals(1, postRes.getPostId());
+        Assertions.assertEquals("포스트 등록 완료", postRes.getMessage());
 
         verify(postRepository).save(any());
     }
@@ -77,7 +77,7 @@ class PostServiceTest {
                 .thenReturn(givenPost);
 
         try {
-            PostAddRes postAddRes = postService.addPost(
+            PostRes postRes = postService.addPost(
                     new PostAddReq("title1", "body1"), givenUser.getUserName());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.NOT_FOUND, e.getErrorCode());
@@ -121,5 +121,5 @@ class PostServiceTest {
 
         verify(postRepository).findById(any());
     }
-    
+
 }
