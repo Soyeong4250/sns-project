@@ -2,6 +2,7 @@ package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.PostAddReq;
 import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
 import com.likelion.healing.domain.entity.User;
 import com.likelion.healing.domain.entity.UserRole;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.sql.Timestamp;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -84,4 +86,40 @@ class PostServiceTest {
 
         verify(postRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("포스트 단건 조회 성공")
+    void successfulGetPostById() {
+        User givenUser = User.builder()
+                .userName("Soyeong")
+                .role(UserRole.USER)
+                .build();
+        Mockito.when(userRepository.findByUserName("Soyeong"))
+                .thenReturn(Optional.of(givenUser));
+
+        Post givenPost = Post.builder()
+                .id(1)
+                .title("title1")
+                .body("body1")
+                .user(givenUser)
+                .build();
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        givenPost.setCreatedAt(now);
+        givenPost.setUpdatedAt(now);
+        Mockito.when(postRepository.findById(any(Integer.class)))
+                .thenReturn(Optional.of(givenPost));
+
+
+        PostViewRes postViewRes = postService.getPostById(1);
+
+        Assertions.assertEquals(1, postViewRes.getId());
+        Assertions.assertEquals("title1", postViewRes.getTitle());
+        Assertions.assertEquals("body1", postViewRes.getBody());
+        Assertions.assertEquals("Soyeong", postViewRes.getUserName());
+        Assertions.assertNotNull(postViewRes.getCreatedAt());
+        Assertions.assertNotNull(postViewRes.getLastModifiedAt());
+
+        verify(postRepository).findById(any());
+    }
+    
 }
