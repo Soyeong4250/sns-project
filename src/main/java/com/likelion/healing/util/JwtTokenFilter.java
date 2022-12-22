@@ -1,6 +1,8 @@
 package com.likelion.healing.util;
 
 import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.exception.ErrorCode;
+import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             log.error("인증헤더가 잘못 되었습니다.");
             filterChain.doFilter(request, response);
-            return;
+            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
         }
 
         String token;
@@ -42,16 +44,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }catch (IllegalArgumentException e) {
             log.error("token이 비어있습니다. ", e);
             filterChain.doFilter(request, response);
-            return;
+            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
         }catch (Exception e) {
             log.error("token 추출에 실패했습니다. ", e);
             filterChain.doFilter(request, response);
-            return;
+            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
         }
 
         if(JwtTokenUtil.isExpired(token, secretKey)) {
             filterChain.doFilter(request, response);
-            return;
+            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
         }
 
         String userName = JwtTokenUtil.getUserName(token, secretKey);
