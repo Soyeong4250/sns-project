@@ -25,7 +25,7 @@ public class PostService {
 
     public PostRes addPost(PostAddReq postAddReq, String userName) {
         User user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
         Post post = Post.builder()
                 .title(postAddReq.getTitle())

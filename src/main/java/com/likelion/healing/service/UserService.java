@@ -45,7 +45,7 @@ public class UserService {
         log.info("userName: {}", userLoginReq.getUserName());
 
         User user = userRepository.findByUserName(userLoginReq.getUserName())
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userLoginReq.getUserName())));
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userLoginReq.getUserName())));
 
         if(!encoder.matches(userLoginReq.getPassword(), user.getPassword())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PASSWORD, "회원 이름 또는 비밀번호를 다시 확인해주세요.");
@@ -59,6 +59,6 @@ public class UserService {
 
     public User getUserByUserName(String userName) {
         return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
     }
 }
