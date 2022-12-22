@@ -10,8 +10,9 @@ import javax.persistence.*;
 @Entity
 @Table(name = "post")
 @Getter
-@Setter
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @EqualsAndHashCode(callSuper = true)
 @Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -30,11 +31,4 @@ public class Post extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Builder
-    public Post(String title, String body, User user) {
-        this.title = title;
-        this.body = body;
-        this.user = user;
-    }
 }
