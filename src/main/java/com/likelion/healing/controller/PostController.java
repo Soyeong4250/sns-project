@@ -1,7 +1,7 @@
 package com.likelion.healing.controller;
 
 import com.likelion.healing.domain.dto.PostAddReq;
-import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.service.PostService;
@@ -23,13 +23,13 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping()
-    public Response<PostAddRes> addPost(@RequestBody PostAddReq postAddReq, Authentication authentication) {
+    public Response<PostRes> addPost(@RequestBody PostAddReq postAddReq, Authentication authentication) {
         log.info("title : {}, body : {}", postAddReq.getTitle(), postAddReq.getBody());
         String userName = authentication.getName();
         log.info("authentication : {}", authentication);
         log.info("userName : {}", userName);
-        PostAddRes postAddRes = postService.addPost(postAddReq, userName);
-        return Response.success(new PostAddRes(postAddRes.getMessage(), postAddRes.getPostId()));
+        PostRes postRes = postService.addPost(postAddReq, userName);
+        return Response.success(new PostRes(postRes.getMessage(), postRes.getPostId()));
     }
 
     @GetMapping()
@@ -46,7 +46,7 @@ public class PostController {
     }
 
     @PostMapping("/{id}/edit")
-    public Response<PostViewRes> updatePostById(@PathVariable Integer id) {
+    public Response<PostRes> updatePostById(@PathVariable Integer id) {
         log.info("postId : {}", id);
         return Response.success(null);
     }
