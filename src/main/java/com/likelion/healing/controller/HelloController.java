@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/hello")
 public class HelloController {
 
-    @ApiOperation(value = "hello 출력", notes = "Get Method를 이용하여 hello 문자열을 출력합니다.")
+    @ApiOperation(value = "cicd test 출력", notes = "Get Method를 이용하여 cicd test 문자열을 출력합니다.")
     @GetMapping()
     public String printHello() {
         log.debug("printHello() 실행");
-        return "hello";
+        return "darkchocolate";
     }
 }
