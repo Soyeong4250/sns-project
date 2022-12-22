@@ -39,8 +39,9 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public Response<PostViewRes> getPost(@PathVariable Integer id) {
+    public Response<PostViewRes> getPostById(@PathVariable Integer id) {
         log.info("postId : {}", id);
-        return Response.success(null);
+        PostViewRes postRes = postService.getPostById(id);
+        return Response.success(new PostViewRes(postRes.getId(), postRes.getTitle(), postRes.getBody(), postRes.getUserName(), postRes.getCreatedAt(), postRes.getLastModifiedAt()));
     }
 }
