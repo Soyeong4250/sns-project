@@ -3,6 +3,7 @@ package com.likelion.healing.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.domain.dto.PostAddReq;
 import com.likelion.healing.domain.dto.PostAddRes;
+import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.PostService;
@@ -15,9 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.sql.Timestamp;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -123,4 +127,36 @@ class PostControllerTest {
         int end = Math.min((start + pageRequest.getPageSize()), postList.size());
         return new PageImpl<>(postList.subList(start, end), pageRequest, postList.size());
     }*/
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 단건 조회 성공")
+    void successfulGetPostById() throws Exception {
+        Integer postId = 1;
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        PostViewRes post = PostViewRes.builder()
+                .id(1)
+                .title("title1")
+                .body("body1")
+                .userName("Soyeong")
+                .createdAt(now)
+                .lastModifiedAt(now)
+                .build();
+
+        given(postService.getPostById(any(Integer.class))).willReturn(post);
+
+        mockMvc.perform(get(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(postId)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.id").value(1))
+                .andExpect(jsonPath("$.result.title").value("title1"))
+                .andExpect(jsonPath("$.result.body").value("body1"))
+                .andExpect(jsonPath("$.result.userName").value("Soyeong"))
+                .andExpect(jsonPath("$.result.createdAt").exists())
+                .andExpect(jsonPath("$.result.lastModifiedAt").exists());
+    }
 }
