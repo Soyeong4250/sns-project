@@ -25,7 +25,7 @@ public class PostController {
         log.info("title : {}, body : {}", postAddReq.getTitle(), postAddReq.getBody());
         String userName = authentication.getName();
         log.info("userName : {}", userName);
-        postService.addPost(postAddReq, userName);
-        return Response.success(PostAddRes.builder().build());
+        PostAddRes postAddRes = postService.addPost(postAddReq, userName);
+        return Response.success(new PostAddRes(postAddRes.getMessage(), postAddRes.getPostId()));
     }
 }
