@@ -65,7 +65,7 @@ class PostServiceTest {
                 .role(UserRole.USER)
                 .build();
         Mockito.when(userRepository.findByUserName("Soyeong"))
-                .thenThrow(new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", givenUser.getUserName())));
+                .thenThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", givenUser.getUserName())));
 
         Post givenPost = Post.builder()
                 .id(1)
@@ -80,7 +80,7 @@ class PostServiceTest {
             PostRes postRes = postService.addPost(
                     new PostAddReq("title1", "body1"), givenUser.getUserName());
         } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.NOT_FOUND, e.getErrorCode());
+            Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
             Assertions.assertEquals("Soyeong은(는) 없는 회원입니다.", e.getMessage());
         }
 
