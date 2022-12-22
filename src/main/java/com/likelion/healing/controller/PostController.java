@@ -37,4 +37,10 @@ public class PostController {
         log.debug("getPostList() 실행");
         return Response.success(postService.getPostList(pageable));
     }
+
+    @GetMapping("/{id}")
+    public Response<PostViewRes> getPost(@PathVariable Integer id) {
+        log.info("postId : {}", id);
+        return Response.success(null);
+    }
 }
