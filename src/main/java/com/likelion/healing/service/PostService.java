@@ -81,4 +81,23 @@ public class PostService {
                 .message("포스트 수정 완료")
                 .build();
     }
+
+    public PostRes deletePostById(Integer postId, String userName) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+
+        if(!post.getUser().getUserName().equals(user.getUserName())) {
+            throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+        }
+
+        postRepository.deleteById(post.getId());
+
+        return PostRes.builder()
+                .postId(post.getId())
+                .message("포스트 삭제 완료")
+                .build();
+    }
 }
