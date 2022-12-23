@@ -14,6 +14,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping()
-    public Response<PostRes> addPost(@RequestBody PostReq postReq, Authentication authentication) {
+    public Response<PostRes> addPost(@RequestBody PostReq postReq, Authentication authentication) throws SQLException  {
         log.info("title : {}, body : {}", postReq.getTitle(), postReq.getBody());
         String userName = authentication.getName();
         log.info("authentication : {}", authentication);
@@ -33,20 +35,20 @@ public class PostController {
     }
 
     @GetMapping()
-    public Response<Page<PostViewRes>> getPostList(@PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Response<Page<PostViewRes>> getPostList(@PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) throws SQLException {
         log.debug("getPostList() 실행");
         return Response.success(postService.getPostList(pageable));
     }
 
     @GetMapping("/{postId}")
-    public Response<PostViewRes> getPostById(@PathVariable Integer postId) {
+    public Response<PostViewRes> getPostById(@PathVariable Integer postId) throws SQLException {
         log.info("postId : {}", postId);
         PostViewRes postRes = postService.getPostById(postId);
         return Response.success(new PostViewRes(postRes.getId(), postRes.getTitle(), postRes.getBody(), postRes.getUserName(), postRes.getCreatedAt(), postRes.getLastModifiedAt()));
     }
 
     @PutMapping("/{id}")
-    public Response<PostRes> updatePostById(@PathVariable Integer id, @RequestBody PostReq postEditReq, Authentication authentication) {
+    public Response<PostRes> updatePostById(@PathVariable Integer id, @RequestBody PostReq postEditReq, Authentication authentication) throws SQLException {
         log.info("postId : {}", id);
         log.info("post title : {}", postEditReq.getTitle());
         log.info("post body : {}", postEditReq.getBody());
