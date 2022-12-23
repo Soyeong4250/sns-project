@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
+import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.PostService;
@@ -22,8 +24,7 @@ import java.sql.Timestamp;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -155,5 +156,99 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.userName").value("Soyeong"))
                 .andExpect(jsonPath("$.result.createdAt").exists())
                 .andExpect(jsonPath("$.result.lastModifiedAt").exists());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("포스트 수정 실패 - 인증 실패")
+    void authenticationFailed() throws Exception {
+        PostReq req = PostReq.builder()
+                .title("test title")
+                .body("test body")
+                .build();
+        User user = User.builder()
+                .userName("Soyeong")
+                .password("12345")
+                .role(UserRole.USER)
+                .build();
+        Integer postId = 1;
+
+        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUserName())));
+
+        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(req)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 수정 실패 - 작성자 불일치")
+    void mismatchedAuthorAndUser() throws Exception {
+        PostReq req = PostReq.builder()
+                .title("test title")
+                .body("test body")
+                .build();
+        Integer postId = 1;
+
+        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(req)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 수정 실패 - 데이터베이스 에러")
+    void notFoundDatabase() throws Exception {
+        PostReq req = PostReq.builder()
+                .title("test title")
+                .body("test body")
+                .build();
+        Integer postId = 1;
+
+        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+
+        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(req)))
+                .andDo(print())
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
+                .andExpect(jsonPath("$.result.message").value("DB에러"));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 수정 성공")
+    void successfulEdit() throws Exception {
+        PostReq req = PostReq.builder()
+                .title("test title")
+                .body("test body")
+                .build();
+        Integer postId = 1;
+
+        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willReturn(new PostRes("포스트 수정 완료", postId));
+
+        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(req)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
+                .andExpect(jsonPath("$.result.postId").value(postId));
     }
 }
