@@ -55,4 +55,10 @@ public class PostController {
         PostRes postRes = postService.updatePostById(id, postEditReq, authentication.getName());
         return Response.success(postRes);
     }
+
+    @DeleteMapping("/{id}")
+    public Response<PostRes> deletePostById(@PathVariable Integer id, Authentication authentication) {
+        log.info("postId : {}", id);
+        return Response.success(null);
+    }
 }
