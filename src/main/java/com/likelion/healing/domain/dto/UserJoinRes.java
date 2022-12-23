@@ -15,6 +15,7 @@ public class UserJoinRes {
 
     @Schema(description = "회원 번호")
     private Integer userId;
+
     @Schema(description = "회원 이름")
     private String userName;
 

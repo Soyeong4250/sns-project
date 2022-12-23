@@ -17,6 +17,7 @@ public class UserJoinReq {
 
     @Schema(description = "회원 이름")
     private String userName;
+
     @Schema(description = "회원 비밀번호")
     private String password;
 
