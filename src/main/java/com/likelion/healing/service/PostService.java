@@ -72,6 +72,7 @@ public class PostService {
         Post newPost = Post.builder()
                         .title(postEditReq.getTitle())
                         .body(postEditReq.getBody())
+                        .user(user)
                         .build();
         Post savedPost = postRepository.save(newPost);
 
