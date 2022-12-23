@@ -38,10 +38,10 @@ public class PostController {
         return Response.success(postService.getPostList(pageable));
     }
 
-    @GetMapping("/{id}")
-    public Response<PostViewRes> getPostById(@PathVariable Integer id) {
-        log.info("postId : {}", id);
-        PostViewRes postRes = postService.getPostById(id);
+    @GetMapping("/{postId}")
+    public Response<PostViewRes> getPostById(@PathVariable Integer postId) {
+        log.info("postId : {}", postId);
+        PostViewRes postRes = postService.getPostById(postId);
         return Response.success(new PostViewRes(postRes.getId(), postRes.getTitle(), postRes.getBody(), postRes.getUserName(), postRes.getCreatedAt(), postRes.getLastModifiedAt()));
     }
 
