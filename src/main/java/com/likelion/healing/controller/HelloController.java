@@ -17,6 +17,6 @@ public class HelloController {
     @GetMapping()
     public String printHello() {
         log.debug("printHello() 실행");
-        return "darkchocolate";
+        return "popin";
     }
 }
