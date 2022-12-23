@@ -14,12 +14,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -102,51 +108,49 @@ class PostControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    /*@Test
-    @DisplayName("포스트 전체 목록 - 생성일자 내림차순 조회 테스트")
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 전체 목록 조회 - 생성일자 내림차순")
     void getPostList() throws Exception {
+
         List<PostViewRes> postList = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            postList.add(new PostViewRes(i, "title" + i, "body" + i, "Soyeong", new Timestamp(System.currentTimeMillis())));
+        List<Timestamp> timeList = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            timeList.add(now);
+            postList.add(new PostViewRes(i, "title"+(i+1), "body"+(i+1), "Soyeong", now, now));
         }
-        postList.stream().sorted(Comparator.comparing(PostViewRes::getCreatedAt).reversed());
-        Page<PostViewRes> postPage = listToPage(postList);
+        timeList.stream().sorted(Timestamp::compareTo);
+        for (Timestamp time:timeList) {
+            System.out.println(time);
+        }
+        Page<PostViewRes> pageRes = new PageImpl<>(postList);
+        given(postService.getPostList(any(Pageable.class))).willReturn(pageRes);
 
-        Mockito.when(postService.getPostList(any(Pageable.class))).thenReturn(postPage);
+        mockMvc.perform(get("/api/v1/posts"))
+                .andExpect(status().isOk())
+                .andDo(print());
 
-
-        Response<Page<PostViewRes>> = postController.getPostList(Pageable);
-        Assertions.assertTrue(jsonPath("$.result.content[0].createdAt").comparejsonPath("$.result.content[1].createdAt"));
     }
-
-    private Page<PostViewRes> listToPage(List<PostViewRes> postList) {
-        PageRequest pageRequest = PageRequest.of(1, 20);
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), postList.size());
-        return new PageImpl<>(postList.subList(start, end), pageRequest, postList.size());
-    }*/
 
     @Test
     @WithMockUser
     @DisplayName("포스트 단건 조회 성공")
     void successfulGetPostById() throws Exception {
         Integer postId = 1;
-        Timestamp now = new Timestamp(System.currentTimeMillis());
         PostViewRes post = PostViewRes.builder()
                 .id(1)
                 .title("title1")
                 .body("body1")
                 .userName("Soyeong")
-                .createdAt(now)
-                .lastModifiedAt(now)
+                .createdAt(Timestamp.from(Instant.now()))
+                .lastModifiedAt(Timestamp.from(Instant.now()))
                 .build();
 
         given(postService.getPostById(any(Integer.class))).willReturn(post);
 
         mockMvc.perform(get(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(postId)))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
