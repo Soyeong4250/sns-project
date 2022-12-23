@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-public class PostAddReq {
+public class PostReq {
 
     private String title;
     private String body;
