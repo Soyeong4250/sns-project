@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -63,7 +64,7 @@ class PostControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     @DisplayName("포스트 작성 실패 - JWT를 Bearer Token으로 보내지 않은 경우")
     void notStartsWithBearer() throws Exception {
         PostAddReq req = PostAddReq.builder()
@@ -71,20 +72,18 @@ class PostControllerTest {
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostAddReq.class), "Bearerrrr " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다."));
+        given(postService.addPost(any(PostAddReq.class), "Bearerrrr " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post("/api/v1/posts")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(req)))
                 .andDo(print())
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_TOKEN"))
-                .andExpect(jsonPath("$.result.message").value("잘못된 토큰입니다."));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     @DisplayName("포스트 작성 실패 - JWT가 유효하지 않은 경우")
     void expiredToken() throws Exception {
         PostAddReq req = PostAddReq.builder()
@@ -92,16 +91,14 @@ class PostControllerTest {
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostAddReq.class), "Bearer " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다."));
+        given(postService.addPost(any(PostAddReq.class), "Bearer " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post("/api/v1/posts")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(req)))
                 .andDo(print())
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_TOKEN"))
-                .andExpect(jsonPath("$.result.message").value("잘못된 토큰입니다."));
+                .andExpect(status().isUnauthorized());
     }
 
     /*@Test
