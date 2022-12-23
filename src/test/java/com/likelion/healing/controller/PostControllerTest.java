@@ -1,7 +1,7 @@
 package com.likelion.healing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.likelion.healing.domain.dto.PostAddReq;
+import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.exception.ErrorCode;
@@ -45,12 +45,12 @@ class PostControllerTest {
     @WithMockUser
     @DisplayName("포스트 작성 성공")
     void successfulAddPost() throws Exception {
-        PostAddReq req = PostAddReq.builder()
+        PostReq req = PostReq.builder()
                 .title("title1")
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostAddReq.class), "Bearer " + any(String.class))).willReturn(new PostRes("포스트 등록 완료", 1));
+        given(postService.addPost(any(PostReq.class), "Bearer " + any(String.class))).willReturn(new PostRes("포스트 등록 완료", 1));
 
         mockMvc.perform(post("/api/v1/posts")
                 .with(csrf())
@@ -67,12 +67,12 @@ class PostControllerTest {
     @WithAnonymousUser
     @DisplayName("포스트 작성 실패 - JWT를 Bearer Token으로 보내지 않은 경우")
     void notStartsWithBearer() throws Exception {
-        PostAddReq req = PostAddReq.builder()
+        PostReq req = PostReq.builder()
                 .title("title1")
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostAddReq.class), "Bearerrrr " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+        given(postService.addPost(any(PostReq.class), "Bearerrrr " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post("/api/v1/posts")
                         .with(csrf())
@@ -86,12 +86,12 @@ class PostControllerTest {
     @WithAnonymousUser
     @DisplayName("포스트 작성 실패 - JWT가 유효하지 않은 경우")
     void expiredToken() throws Exception {
-        PostAddReq req = PostAddReq.builder()
+        PostReq req = PostReq.builder()
                 .title("title1")
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostAddReq.class), "Bearer " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+        given(postService.addPost(any(PostReq.class), "Bearer " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post("/api/v1/posts")
                         .with(csrf())
