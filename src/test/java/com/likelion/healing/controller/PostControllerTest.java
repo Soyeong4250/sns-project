@@ -165,7 +165,7 @@ class PostControllerTest {
     @Test
     @WithAnonymousUser
     @DisplayName("포스트 수정 실패 - 인증 실패")
-    void authenticationFailed() throws Exception {
+    void update_authenticationFailed() throws Exception {
         PostReq req = PostReq.builder()
                 .title("test title")
                 .body("test body")
@@ -190,7 +190,7 @@ class PostControllerTest {
     @Test
     @WithMockUser
     @DisplayName("포스트 수정 실패 - 작성자 불일치")
-    void mismatchedAuthorAndUser() throws Exception {
+    void update_mismatchedAuthorAndUser() throws Exception {
         PostReq req = PostReq.builder()
                 .title("test title")
                 .body("test body")
@@ -213,7 +213,7 @@ class PostControllerTest {
     @Test
     @WithMockUser
     @DisplayName("포스트 수정 실패 - 데이터베이스 에러")
-    void notFoundDatabase() throws Exception {
+    void update_notFoundDatabase() throws Exception {
         PostReq req = PostReq.builder()
                 .title("test title")
                 .body("test body")
@@ -254,5 +254,75 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
                 .andExpect(jsonPath("$.result.postId").value(postId));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 삭제 성공")
+    void successfulDelete() throws Exception {
+        Integer postId = 1;
+
+        given(postService.deletePostById(any(Integer.class), any(String.class))).willReturn(new PostRes("포스트 삭제 완료", postId));
+
+        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
+                .andExpect(jsonPath("$.result.postId").value(postId));
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("포스트 삭제 실패 - 인증 실패")
+    void delete_authenticationFailed() throws Exception {
+        User user = User.builder()
+                .userName("Soyeong")
+                .password("12345")
+                .role(UserRole.USER)
+                .build();
+        Integer postId = 1;
+
+        given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUserName())));
+
+        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 삭제 실패 - 작성자 불일치")
+    void delete_mismatchedAuthorAndUser() throws Exception {
+        Integer postId = 1;
+
+        given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("포스트 삭제 실패 - 데이터베이스 에러")
+    void delete_notFoundDatabase() throws Exception {
+        Integer postId = 1;
+
+        given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+
+        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
+                .andExpect(jsonPath("$.result.message").value("DB에러"));
     }
 }
