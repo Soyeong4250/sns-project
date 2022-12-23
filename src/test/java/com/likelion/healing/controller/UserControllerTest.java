@@ -107,7 +107,7 @@ class UserControllerTest {
                 .password("12345")
                 .build();
 
-        given(userService.login(any(UserLoginReq.class))).willThrow(new HealingSnsAppException(ErrorCode.NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", req.getUserName())));
+        given(userService.login(any(UserLoginReq.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", req.getUserName())));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .with(csrf())
