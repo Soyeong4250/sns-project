@@ -1,6 +1,6 @@
 package com.likelion.healing.service;
 
-import com.likelion.healing.domain.dto.PostAddReq;
+import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
@@ -9,6 +9,7 @@ import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.fixture.PostEntityFixture;
 import com.likelion.healing.fixture.TestInfoFixture;
+import com.likelion.healing.fixture.UserEntityFixture;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -41,12 +42,12 @@ class PostServiceTest {
         Mockito.when(postRepository.save(any(Post.class)))
                 .thenReturn(mockPost);
 
-        Assertions.assertDoesNotThrow(() -> postService.addPost(new PostAddReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
+        Assertions.assertDoesNotThrow(() -> postService.addPost(new PostReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
     }
 
     @Test
     @DisplayName("포스트 등록 실패 - 회원이 존재하지 않을 때")
-    void notFoundUser() {
+    void notFoundWriter() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
         User givenUser = mock(User.class);
@@ -59,7 +60,7 @@ class PostServiceTest {
 
         try {
             PostRes postRes = postService.addPost(
-                    new PostAddReq("title1", "body1"), givenUser.getUserName());
+                    new PostReq("title1", "body1"), givenUser.getUserName());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
         }
@@ -92,5 +93,66 @@ class PostServiceTest {
         Assertions.assertNotNull(postViewRes.getLastModifiedAt());
 
         verify(postRepository).findById(any());
+    }
+
+    @Test
+    @DisplayName("포스트 수정 실패 - 포스트 존재하지 않는 경우")
+    void notFoundPost() {
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+        Mockito.when(postRepository.findById(fixture.getPostId()))
+                .thenThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        try {
+            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
+        } catch (HealingSnsAppException e) {
+            Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+        }
+    }
+
+    @Test
+    @DisplayName("포스트 수정 실패 - 작성자와 유저가 일치하지 않는 경우")
+    void notFoundEditUser() {
+        User givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
+        User givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
+        Post givenPost = PostEntityFixture.get(givenUser1.getUserName(), givenUser1.getPassword());
+
+        Mockito.when(userRepository.findByUserName(givenUser2.getUserName()))
+                .thenReturn(Optional.of(givenUser2));
+
+        Mockito.when(postRepository.findById(givenPost.getId()))
+                .thenReturn(Optional.of(givenPost));
+
+        try {
+            PostRes postRes = postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUserName());
+        } catch (HealingSnsAppException e) {
+            Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+        }
+
+        verify(userRepository, atLeastOnce()).findByUserName(any());
+        verify(postRepository, atLeastOnce()).findById(any());
+    }
+
+    @Test
+    @DisplayName("포스트 수정 실패 - 유저가 존재하지 않는 경우")
+    void mismatchedAuthorAndUser() {
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+        Post mockPost = mock(Post.class);
+        Mockito.when(postRepository.findById(fixture.getPostId()))
+                .thenReturn(Optional.of(mockPost));
+
+        Mockito.when(userRepository.findByUserName(fixture.getUserName()))
+                .thenThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
+
+        Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
+        Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
+        try {
+            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
+        } catch (HealingSnsAppException e) {
+            Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+        }
+
+        verify(postRepository, never()).save(any());
     }
 }
