@@ -1,6 +1,6 @@
 package com.likelion.healing.controller;
 
-import com.likelion.healing.domain.dto.PostAddReq;
+import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Response;
@@ -23,12 +23,12 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping()
-    public Response<PostRes> addPost(@RequestBody PostAddReq postAddReq, Authentication authentication) {
-        log.info("title : {}, body : {}", postAddReq.getTitle(), postAddReq.getBody());
+    public Response<PostRes> addPost(@RequestBody PostReq postReq, Authentication authentication) {
+        log.info("title : {}, body : {}", postReq.getTitle(), postReq.getBody());
         String userName = authentication.getName();
         log.info("authentication : {}", authentication);
         log.info("userName : {}", userName);
-        PostRes postRes = postService.addPost(postAddReq, userName);
+        PostRes postRes = postService.addPost(postReq, userName);
         return Response.success(new PostRes(postRes.getMessage(), postRes.getPostId()));
     }
 
@@ -45,9 +45,12 @@ public class PostController {
         return Response.success(new PostViewRes(postRes.getId(), postRes.getTitle(), postRes.getBody(), postRes.getUserName(), postRes.getCreatedAt(), postRes.getLastModifiedAt()));
     }
 
-    @PostMapping("/{id}/edit")
-    public Response<PostRes> updatePostById(@PathVariable Integer id) {
+    @PutMapping("/{id}")
+    public Response<PostRes> updatePostById(@PathVariable Integer id, @RequestBody PostReq postEditReq, Authentication authentication) {
         log.info("postId : {}", id);
-        return Response.success(null);
+        log.info("post title : {}", postEditReq.getTitle());
+        log.info("post body : {}", postEditReq.getBody());
+        PostRes postRes = postService.updatePostById(id, postEditReq, authentication.getName());
+        return Response.success(postRes);
     }
 }
