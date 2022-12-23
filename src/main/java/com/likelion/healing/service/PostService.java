@@ -1,6 +1,6 @@
 package com.likelion.healing.service;
 
-import com.likelion.healing.domain.dto.PostAddReq;
+import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
@@ -23,13 +23,13 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public PostRes addPost(PostAddReq postAddReq, String userName) {
+    public PostRes addPost(PostReq postReq, String userName) {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
         Post post = Post.builder()
-                .title(postAddReq.getTitle())
-                .body(postAddReq.getBody())
+                .title(postReq.getTitle())
+                .body(postReq.getBody())
                 .user(user)
                 .build();
         Post savedPost = postRepository.save(post);
@@ -56,5 +56,28 @@ public class PostService {
                         .createdAt(post.getCreatedAt())
                         .lastModifiedAt(post.getUpdatedAt())
                         .build();
+    }
+
+    public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+
+        if(!post.getUser().getUserName().equals(user.getUserName())) {
+            throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+        }
+
+        Post newPost = Post.builder()
+                        .title(postEditReq.getTitle())
+                        .body(postEditReq.getBody())
+                        .build();
+        Post savedPost = postRepository.save(newPost);
+
+        return PostRes.builder()
+                .postId(savedPost.getId())
+                .message("포스트 수정 완료")
+                .build();
     }
 }
