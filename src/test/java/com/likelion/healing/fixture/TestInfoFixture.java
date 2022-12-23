@@ -11,7 +11,7 @@ public class TestInfoFixture {
         info.setUserName("Soyeong");
         info.setPassword("12345");
         info.setTitle("title1");
-        info.setPassword("body1");
+        info.setBody("body1");
         return info;
     }
     
