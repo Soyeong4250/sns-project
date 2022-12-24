@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,11 +31,11 @@ public class PostViewRes {
 
     @Schema(description = "포스트 작성일자")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @Schema(description = "포스트 마지막 수정일자")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
-    private Timestamp lastModifiedAt;
+    private LocalDateTime lastModifiedAt;
 
     public static PostViewRes of(Post post) {
         return PostViewRes.builder()
