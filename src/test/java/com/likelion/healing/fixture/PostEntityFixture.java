@@ -2,8 +2,7 @@ package com.likelion.healing.fixture;
 
 import com.likelion.healing.domain.entity.Post;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class PostEntityFixture {
 
@@ -14,8 +13,8 @@ public class PostEntityFixture {
                 .title("title1")
                 .body("body1")
                 .build();
-        postEntity.setCreatedAt(Timestamp.from(Instant.now()));
-        postEntity.setUpdatedAt(Timestamp.from(Instant.now()));
+        postEntity.setCreatedAt(LocalDateTime.now());
+        postEntity.setUpdatedAt(LocalDateTime.now());
         return postEntity;
     }
 }
