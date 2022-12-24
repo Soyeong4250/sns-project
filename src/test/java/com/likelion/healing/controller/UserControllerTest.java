@@ -114,7 +114,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(req)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.result.errorCode").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.result.errorCode").value("USERNAME_NOT_FOUND"))
                 .andExpect(jsonPath("$.result.message").value(req.getUserName() + "은(는) 없는 회원입니다."))
                 .andDo(print());
     }
