@@ -22,8 +22,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,14 +113,14 @@ class PostControllerTest {
     void getPostList() throws Exception {
 
         List<PostViewRes> postList = new ArrayList<>();
-        List<Timestamp> timeList = new ArrayList<>();
+        List<LocalDateTime> timeList = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            Timestamp now = new Timestamp(System.currentTimeMillis());
+            LocalDateTime now = LocalDateTime.now();
             timeList.add(now);
             postList.add(new PostViewRes(i, "title"+(i+1), "body"+(i+1), "Soyeong", now, now));
         }
-        timeList.stream().sorted(Timestamp::compareTo);
-        for (Timestamp time:timeList) {
+        timeList.stream().sorted(LocalDateTime::compareTo);
+        for (LocalDateTime time:timeList) {
             System.out.println(time);
         }
         Page<PostViewRes> pageRes = new PageImpl<>(postList);
@@ -143,8 +142,8 @@ class PostControllerTest {
                 .title("title1")
                 .body("body1")
                 .userName("Soyeong")
-                .createdAt(Timestamp.from(Instant.now()))
-                .lastModifiedAt(Timestamp.from(Instant.now()))
+                .createdAt(LocalDateTime.now())
+                .lastModifiedAt(LocalDateTime.now())
                 .build();
 
         given(postService.getPostById(any(Integer.class))).willReturn(post);
