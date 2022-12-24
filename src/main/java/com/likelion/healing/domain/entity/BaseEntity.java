@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,12 +23,12 @@ public class BaseEntity {
     @CreatedDate
     @Column(updatable = false)
     @Schema(description = "생성시간", example = "yyyy-mm-dd hh:mm:ss")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Schema(description = "마지막 수정시간", example = "yyyy-mm-dd hh:mm:ss")
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
     @Schema(description = "삭제시간", example = "yyyy-mm-dd hh:mm:ss")
-    private Timestamp deletedAt;
+    private LocalDateTime deletedAt;
 }
