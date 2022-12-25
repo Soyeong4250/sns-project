@@ -70,6 +70,7 @@ public class PostService {
         }
 
         Post newPost = Post.builder()
+                        .id(post.getId())
                         .title(postEditReq.getTitle())
                         .body(postEditReq.getBody())
                         .user(user)
