@@ -78,7 +78,7 @@ class PostControllerTest {
                 .body("body1")
                 .build();
 
-        given(postService.addPost(any(PostReq.class), "Bearerrrr " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+        given(postService.addPost(any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post("/api/v1/posts")
                         .with(csrf())
