@@ -1,8 +1,6 @@
 package com.likelion.healing.util;
 
 import com.likelion.healing.domain.entity.User;
-import com.likelion.healing.exception.ErrorCode;
-import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +39,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if(!authorizationHeader.startsWith("Bearer ")) {
             log.error("인증헤더가 잘못 되었습니다.");
             filterChain.doFilter(request, response);
-            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
+            return;
         }
 
         String token;
@@ -59,7 +57,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         if(JwtTokenUtil.isExpired(token, secretKey)) {
             filterChain.doFilter(request, response);
-            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
+            return;
         }
 
         String userName = JwtTokenUtil.getUserName(token, secretKey);
