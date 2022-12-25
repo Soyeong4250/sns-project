@@ -1,9 +1,8 @@
 package com.likelion.healing.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -15,10 +14,9 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = "password")
 @Where(clause = "deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@DynamicInsert
-@DynamicUpdate
+@SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Schema(description = "회원")
 public class User extends BaseEntity {
 
@@ -32,6 +30,7 @@ public class User extends BaseEntity {
     private String userName;
 
     @Column(nullable = false)
+    @JsonIgnore
     @Schema(description = "회원 비밀번호")
     private String password;
 
