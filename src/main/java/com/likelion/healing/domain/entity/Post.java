@@ -29,7 +29,7 @@ public class Post extends BaseEntity{
     @Schema(description = "포스트 제목")
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 300)
     @Schema(description = "포스트 내용")
     private String body;
 
