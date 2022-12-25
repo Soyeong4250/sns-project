@@ -2,6 +2,8 @@ package com.likelion.healing.domain.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -15,6 +17,8 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 @Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@DynamicInsert
+@DynamicUpdate
 @Schema(description = "회원")
 public class User extends BaseEntity {
 
