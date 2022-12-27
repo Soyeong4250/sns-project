@@ -1,6 +1,6 @@
 # SNS PROJECT
 
-## 프로젝트 소개
+## Project Introduction
 
 멋쟁이 사자처럼 최종 프로젝트로, SNS 개발을 위한 프로젝트 입니다.
 
@@ -14,15 +14,48 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 <br />
 
-## Architecture
+## Service Architecture
 
-![image-20221227181107062](C:\PJT\healing-sns\assets\image-20221227181107062.png)
+!(./assets/image-20221227181107062.png)
+
+![image-20221227182015912](./assets/image-20221227182015912.png)
 
 <br />
 
+<br />
 
+## ERD
+
+![image-20221227183630243](./assets/image-20221227183630243.png)
+
+<br />
+
+<br />
 
 ## 미션 요구사항 분석 체크리스트
+
+**[필수 과제]**
+
+- [x] GitLab CI/CD를 이용한 Docker 자동 배포 
+- [x] 회원가입
+- [x] 로그인
+- [x] 포스트 CRUD
+
+<br />
+
+**[도전 과제]**
+
+- [ ] 화면 UI 구현하기
+
+- [x] ADMIN 회원의 권한 변경 기능
+
+- [x] ADMIN 회원일 경우 자신이 작성한 글 또는 댓글의 수정 삭제가 가능
+
+  👉 ADMIN 계정 (userName: Soyeong, password: 12345)
+
+<br />
+
+<br />
 
 ### 1주차 미션 요약
 
@@ -30,174 +63,273 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 **[접근 방법]**
 
-#### 1️⃣ 회원가입
+#### 1️⃣ 회원가입 & 로그인
 
-✅ userName과 password만을 입력으로 필요로 한다
-
-✅ password는  `BCryptPasswordEncoder`를 이용하여 암호화를 거친 후 데이터베이스에 저장
-
-✅ userName이 중복되는 경우 `409 Error` 가 발생하고 Response로 `DUPLICATED_USER_NAME` 과 `~은(는) 이미 있습니다.` return
-
-✅ 회원가입 성공 시 `200` 상태코드와 Response로 `SUCCESS` resultCode와 `userId와 userName을 담은 result` 객체가 return
-
-✅ 회원가입 성공과 실패의 경우를 `given().willReturn() `또는 `given().willThrow()`  을 이용하여 UserService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
+👉 [구현 내용](./note/회원가입&로그인.md)
 
 <br />
 
-#### 2️⃣ 로그인
+#### 2️⃣ 포스트 CRUD
 
-✅ userName과 password만을 입력으로 필요로 한다
-
-✅ userName를 통해 존재하는 회원인지 검증 후, 존재하지 않는다면 `ErrorCode.USERNAME_NOT_FOUND` 와 `~은(는) 없는 회원입니다.` return
-
-✅ 입력된 password와 DB에 암호화 되어 있던 password를  `BCryptPasswordEncoder`를 이용하여 일치하는지 확인
-
-✅ 로그인 성공 시  `200` 상태코드와 Response로 `SUCCESS` resultCode와  `jwt를 담은 result` return 👉 토큰 발행
-
-✅ 로그인 성공과 실패의 경우를 `given().willReturn()` 또는 `given().willThrow()` 을 이용하여 UserService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
+👉  [구현 내용](./note/포스트CRUD.md)
 
 <br />
 
-#### 3️⃣ 포스트 등록
-
-✅ title과 body만을 입력으로 필요로 한다
-
-✅ userName를 통해 존재하는 회원인지 검증 후, 존재하지 않는다면 `ErrorCode.USERNAME_NOT_FOUND` 와 `~은(는) 없는 회원입니다.` return
-
-✅ 등록 성공 시  `200` 상태코드와 Response로 `SUCCESS` resultCode와  `포스트 등록 완료 message와 postId를 담은 result` return
-
-✅ 포스트 등록 성공과 실패의 경우를 `given().willReturn()` 또는 `given().willThrow()` 을 이용하여 PostService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
-
- - 포스트 등록 성공
- - 포스트 작성 실패 - JWT를 Bearer Token으로 보내지 않은 경우
-- 포스트 작성 실패 - JWT가 유효하지 않은 경우
-
-✅ 포스트 등록 성공과 실패의 경우를 `when().willReturn()` 또는 `when().thenThrow()` 를 이용하여 PostRepository를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Service Test
-
-- 포스트 등록 성공
-- 포스트 작성 실패 - 회원이 존재하지 않을 때
-
-<br />
-
-#### 4️⃣ 포스트 상세 조회
-
-✅  PathVariable로 id(포스트 번호)를 넘겨줌
-
-✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
-
-✅ 포스트 상세 조회 성공 시 `200` 상태코드와 Response로 `SUCCESS` resultCode와  `조회한 포스트의 정보(id, title, body, userName, createdAt, lastModifiedAt)를 담은 result` return
-
-✅ 포스트 상세 조회 성공의 경우를 `given().willReturn()` 을 이용하여 PostService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
-
-✅ 포스트 상세 조회 성공의 경우를 `when().willReturn()` 를 이용하여 PostRepository를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Service Test
-
-<br />
-
-#### 5️⃣ 포스트 목록 조회
-
-✅ 페이징 처리를 위한 Pageable 객체 활용 (`@PageableDefault`를 활용한 사이즈 정의)
-
-✅ 포스트 목록 조회 성공 시 `200` 상태코드와 Response로 `SUCCESS` resultCode와  `조회한 포스트 목록을 담은 result` return
-
-✅ 포스트 상세 조회 성공의 경우를 `given().willReturn()` 을 이용하여 PostService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
-
-<br />
-
-#### 6️⃣ 포스트 수정
-
-✅ title과 body만을 입력으로 필요로 한다
-
-✅ PathVariable로 id(포스트 번호)를 넘겨주며, `Authentication` 을 이용하여 현재 로그인한 회원에 대한 정보를 확인할 수 있어야 한다
-
-✅ userName를 통해 존재하는 회원인지 검증 후, 존재하지 않는다면 `ErrorCode.USERNAME_NOT_FOUND` 와 `~은(는) 없는 회원입니다.` return
-
-✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
-
-✅`ADMIN`이 아니거나 작성자와 불일치하는 경우 `ErrorCode.INVALID_PERMISSION`와 `사용자가 권한이 없습니다.` return
-
-✅ 권한이 `ADMIN`이라면 작성자와 불일치해도 수정 가능
-
-✅ 수정 성공 시  `200` 상태코드와 Response로 `SUCCESS` resultCode와  `포스트 수정 완료 message와 postId를 담은 result` return
-
-✅ 포스트 수정 성공과 실패의 경우를 `given().willReturn()` 또는 `given().willThrow()` 을 이용하여 PostService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
-
- - 포스트 수정 성공
- - 포스트 수정 실패 - 인증 실패
-- 포스트 수정 실패 - 작성자 불일치
-- 포스트 수정 실패 - 데이터베이스 에러
-
-✅ 포스트 수정 성공과 실패의 경우를 `when().willReturn()` 또는 `when().thenThrow()` 를 이용하여 PostRepository를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Service Test
-
-- 포스트 수정 성공
-
-- 포스트 수정 실패 - 포스트 존재하지 않음
-
-- 포스트 수정 실패 - 작성자와 유저가 일치하지 않는 경우 
-
-  👉 포스트를 작성한 User와 현재 로그인한 User를 다르게 설정
-
-- 포스트 수정 실패 - 유저 존재하지 않음
-
-<br />
-
-#### 7️⃣ 포스트 삭제
-
-✅ PathVariable로 id(포스트 번호)를 넘겨주며, `Authentication` 을 이용하여 현재 로그인한 회원에 대한 정보를 확인할 수 있어야 한다
-
-✅ userName를 통해 존재하는 회원인지 검증 후, 존재하지 않는다면 `ErrorCode.USERNAME_NOT_FOUND` 와 `~은(는) 없는 회원입니다.` return
-
-✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
-
-✅`ADMIN`이 아니거나 작성자와 불일치하는 경우 `ErrorCode.INVALID_PERMISSION`와 `사용자가 권한이 없습니다.` return
-
-✅ 권한이 `ADMIN`이라면 작성자와 불일치해도 포스트 삭제 가능
-
-✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
-
-✅ 삭제 성공 시  `200` 상태코드와 Response로 `SUCCESS` resultCode와  `포스트 삭제 완료 message와 postId를 담은 result` return
-
-✅ 포스트 삭제 성공과 실패의 경우를 `given().willReturn()` 또는 `given().willThrow()` 을 이용하여 PostService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
-
- - 포스트 삭제 성공
- - 포스트 삭제  실패 - 인증 실패
-- 포스트 삭제  실패 - 작성자 불일치
-- 포스트 삭제 실패 - 데이터베이스 에러
-
-✅ 포스트 삭제 성공과 실패의 경우를 `when().willReturn()` 또는 `when().thenThrow()` 를 이용하여 PostRepository를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Service Test
-
-- 포스트 삭제 성공
-
-- 포스트 삭제 실패 - 포스트 존재하지 않음
-
-- 포스트 삭제  실패 - 작성자와 유저가 일치하지 않는 경우 
-
-  👉 포스트를 작성한 User와 현재 로그인한 User를 다르게 설정
-
-- 포스트 삭제 실패 - 유저 존재하지 않음
-
-<br />
-
-#### 8️⃣ 회원 권한 수정
+#### 3️⃣ 회원 권한 수정
 
 - `@Secured` 와 `@EnableGlobalMethodSecurity(securedEnabled = true)` 를 적용함으로써 `ADMIN` 권한을 가지고 있는 User만 접근 가능
 - 혹시 모를 예외에 대비하여 Service에서도 현재 로그인한 User의 권한이 `ADMIN` 인지 확인하는 예외 처리를 추가로 진행 
 - `USER` 권한을 가진 회원이 접근 시 `403 Error` 가 발생하여 이를 ErrorCode에 추가하였으나 예외처리는 아직 하지 못함😢
 
-
+<br />
 
 **[특이사항]**
 
 - 더 깔끔한 코드를 작성할 수도 있었을 것 같은데 기능의 작동을 먼저 생각하다보니 코드가 조금 지저분해진 것 같음 
-- 8️⃣ 회원 권한 수정 시 `USER` 권한을 가진 회원이 접근했을 때 발생하는 `403 Error`에 대한 예외처리를 하지 못한 점이 아쉬움
-- `@Secured` 외에도 사용자의 접근 권한에 대해 설정하는 어노테이션에 대해 학습이 더 필요
-- JPA의 Dirty Check (변경 감지) 에 대해 이번 개발을 진행하며 처음 알게 되어 추가로 학습을 할 예정
-- 프론트엔드를 추가하지 못한 점이 아쉬움
+- 8️⃣ 회원 권한 수정 시 `USER` 권한을 가진 회원이 접근했을 때 발생하는 **`403 Error`에 대한 예외처리**를 하지 못한 점이 아쉬움
+- `@Secured` 외에도 사용자의 **접근 권한에 대해 설정하는 Security 관련 어노테이션**에 대해 학습이 더 필요
+- JPA의 **Dirty Check (변경 감지)** 에 대해 이번 개발을 진행하며 처음 알게 되어 추가로 학습을 할 예정
+- **프론트엔드**를 추가하지 못한 점이 아쉬움
 
-
+<br />
 
 **[참고한 자료 및  소스 코드]**
 
 - [Git] 이전에 학습했던 Git과 정리 내용 : https://github.com/Soyeong4250/spring-security-exercise
 - [도서] 스프링 부트 핵심 가이드
-
 - [도서] 자바 ORM 표준 JPA 프로그래밍
+
+<br />
+
+<br />
+
+## Endpoint
+
+**[User]**
+
+1️⃣ 회원가입
+
+`POST /api/v1/users/join`
+
+Request Body
+
+```json
+{
+  "password": "string",
+  "userName": "string"
+}
+```
+
+Response Body
+
+```json
+{
+  "result": {
+    "userId": int,
+    "userName": "string"
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+2️⃣ 로그인
+
+`POST /api/v1/users/login`
+
+Request Body
+
+```json
+{
+  "password": "string",
+  "userName": "string"
+}
+```
+
+Response Body
+
+```json
+{
+  "result": {
+    "jwt": "string"
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+3️⃣ 권한 수정 
+
+`POST /api/v1/users/{userId}/role/change`
+
+⚠ Admin만 가능
+
+Request Body
+
+```json
+{
+  "role": "string(Enum)"
+}
+```
+
+Response Body
+
+```json
+{
+  "result": {
+    "message": "string",
+    "role": "string(Enum)"
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+**[Post]**
+
+1️⃣ 포스트 등록
+
+`POST /api/v1/posts`
+
+Request Body
+
+```json
+{
+  "body": "string",
+  "title": "string"
+}
+```
+
+Response Body
+
+```JSON
+{
+  "result": {
+    "message": "string",
+    "postId": int
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+2️⃣ 포스트 상세 조회
+
+`GET /api/v1/posts/{id}`
+
+Response Body
+
+```json
+{
+  "result": {
+    "body": "string",
+    "createdAt": "string",
+    "id": int,
+    "lastModifiedAt": "string",
+    "title": "string",
+    "userName": "string"
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+3️⃣ 포스트 목록 조회
+
+`GET /api/v1/posts`
+
+Response Body
+
+```json
+{
+  "result": {
+    "content": [
+      {
+        "body": "string",
+        "createdAt": "string",
+        "id": 0,
+        "lastModifiedAt": "string",
+        "title": "string",
+        "userName": "string"
+      }
+    ],
+    "empty": true,
+    "first": true,
+    "last": true,
+    "number": 0,
+    "numberOfElements": 0,
+    "pageable": {
+      "offset": 0,
+      "pageNumber": 0,
+      "pageSize": 0,
+      "paged": true,
+      "sort": {
+        "empty": true,
+        "sorted": true,
+        "unsorted": true
+      },
+      "unpaged": true
+    },
+    "size": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "totalElements": 0,
+    "totalPages": 0
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+4️⃣ 포스트 수정
+
+`PUT /api/v1/posts/{id}`
+
+Request Body
+
+```json
+{
+  "body": "string",
+  "title": "string"
+}
+```
+
+Response Body
+
+```json
+{
+  "result": {
+    "message": "string",
+    "postId": int
+  },
+  "resultCode": "string"
+}
+```
+
+<br />
+
+5️⃣ 포스트 삭제
+
+`DELETE /api/v1/posts/{id}`
+
+Response Body
+
+```json
+{
+  "result": {
+    "message": "string",
+    "postId": int
+  },
+  "resultCode": "string"
+}
+```
+
