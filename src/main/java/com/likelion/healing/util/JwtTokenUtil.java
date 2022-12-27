@@ -1,5 +1,7 @@
 package com.likelion.healing.util;
 
+import com.likelion.healing.exception.ErrorCode;
+import com.likelion.healing.exception.HealingSnsAppException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,8 +32,13 @@ public class JwtTokenUtil {
     }
 
     public static boolean isExpired(String token, String key) {
-        Date expiredDate = extractClaims(token, key).getExpiration();
-        return expiredDate.before(new Date());
+        try {
+            Date expiredDate = extractClaims(token, key).getExpiration();
+            return expiredDate.before(new Date());
+        }catch (Exception e) {
+            log.error("Token 유효 체크 예외 발생");
+            throw new HealingSnsAppException(ErrorCode.INVALID_TOKEN, "잘못된 토큰입니다.");
+        }
     }
 
     public static String getUserName(String token, String key) {
