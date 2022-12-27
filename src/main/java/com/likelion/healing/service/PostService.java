@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public PostRes addPost(PostReq postReq, String userName) {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
@@ -39,11 +41,13 @@ public class PostService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public Page<PostViewRes> getPostList(Pageable pageable) {
         Page<PostViewRes> postList = postRepository.findAllByOrderByCreatedAtDesc(pageable).map(PostViewRes::of);
         return postList;
     }
 
+    @Transactional
     public PostViewRes getPostById(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
@@ -52,12 +56,13 @@ public class PostService {
                         .id(post.getId())
                         .title(post.getTitle())
                         .body(post.getBody())
-                        .userName(post.getUser().getUserName())
+                        .userName(post.getUser().getUsername())
                         .createdAt(post.getCreatedAt())
                         .lastModifiedAt(post.getUpdatedAt())
                         .build();
     }
 
+    @Transactional
     public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
@@ -65,24 +70,19 @@ public class PostService {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
-        if(!post.getUser().getUserName().equals(user.getUserName())) {
+        if(!post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
-        Post newPost = Post.builder()
-                        .id(post.getId())
-                        .title(postEditReq.getTitle())
-                        .body(postEditReq.getBody())
-                        .user(user)
-                        .build();
-        Post savedPost = postRepository.save(newPost);
+        post.updatePost(postEditReq.getTitle(), postEditReq.getBody());
 
         return PostRes.builder()
-                .postId(savedPost.getId())
+                .postId(postId)
                 .message("포스트 수정 완료")
                 .build();
     }
 
+    @Transactional
     public PostRes deletePostById(Integer postId, String userName) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
@@ -90,11 +90,11 @@ public class PostService {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
-        if(!post.getUser().getUserName().equals(user.getUserName())) {
+        if(!post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
-        postRepository.deleteById(post.getId());
+        post.deletePost();
 
         return PostRes.builder()
                 .postId(post.getId())
