@@ -104,7 +104,7 @@ class PostServiceTest {
                 .thenThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         try {
-            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
+            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName(), fixture.getRole().name());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
         }
@@ -124,7 +124,7 @@ class PostServiceTest {
                 .thenReturn(Optional.of(givenPost));
 
         try {
-            PostRes postRes = postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername());
+            PostRes postRes = postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername(), givenUser2.getRole().name());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
         }
@@ -148,7 +148,7 @@ class PostServiceTest {
         Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
         Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
         try {
-            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
+            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName(), fixture.getRole().name());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
         }
@@ -171,7 +171,7 @@ class PostServiceTest {
         Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
         Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
         try {
-            PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName());
+            PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName(), fixture.getRole().name());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
         }
@@ -188,7 +188,7 @@ class PostServiceTest {
                 .thenThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         try {
-            PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName());
+            PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName(), fixture.getRole().name());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
         }
@@ -208,7 +208,7 @@ class PostServiceTest {
                 .thenReturn(Optional.of(givenPost));
 
         try {
-            PostRes postRes = postService.deletePostById(givenPost.getId(), givenUser2.getUsername());
+            PostRes postRes = postService.deletePostById(givenPost.getId(), givenUser2.getUsername(), givenUser2.getRole().name());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
         }
