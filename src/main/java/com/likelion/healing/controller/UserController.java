@@ -47,6 +47,11 @@ public class UserController {
         return Response.success(userService.login(userLoginReq));
     }
 
+    @ApiOperation(value = "회원 권한 변경", notes = "변경할 권한을 입력받아 권한 변경 성공유무를 반환")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "권한 변경 성공"),
+            @ApiResponse(code = 403, message = "접근 권한 없음")
+    })
     @Secured(UserRole.Authority.ADMIN)
     @PostMapping("/{userId}/role/change")
     public Response<UpdateUserRoleRes> updateRole(@PathVariable Integer userId, @RequestBody UpdateUserRoleReq role, Authentication authentication) {
