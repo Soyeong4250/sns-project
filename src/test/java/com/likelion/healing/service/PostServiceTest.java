@@ -60,7 +60,7 @@ class PostServiceTest {
 
         try {
             PostRes postRes = postService.addPost(
-                    new PostReq("title1", "body1"), givenUser.getUserName());
+                    new PostReq("title1", "body1"), givenUser.getUsername());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
         }
@@ -115,16 +115,16 @@ class PostServiceTest {
     void update_notFoundUser() {
         User givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
         User givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
-        Post givenPost = PostEntityFixture.get(givenUser1.getUserName(), givenUser1.getPassword());
+        Post givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
 
-        Mockito.when(userRepository.findByUserName(givenUser2.getUserName()))
+        Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
                 .thenReturn(Optional.of(givenUser2));
 
         Mockito.when(postRepository.findById(givenPost.getId()))
                 .thenReturn(Optional.of(givenPost));
 
         try {
-            PostRes postRes = postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUserName());
+            PostRes postRes = postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
         }
@@ -199,16 +199,16 @@ class PostServiceTest {
     void delete_notFoundEditUser() {
         User givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
         User givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
-        Post givenPost = PostEntityFixture.get(givenUser1.getUserName(), givenUser1.getPassword());
+        Post givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
 
-        Mockito.when(userRepository.findByUserName(givenUser2.getUserName()))
+        Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
                 .thenReturn(Optional.of(givenUser2));
 
         Mockito.when(postRepository.findById(givenPost.getId()))
                 .thenReturn(Optional.of(givenPost));
 
         try {
-            PostRes postRes = postService.deletePostById(givenPost.getId(), givenUser2.getUserName());
+            PostRes postRes = postService.deletePostById(givenPost.getId(), givenUser2.getUsername());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
         }
