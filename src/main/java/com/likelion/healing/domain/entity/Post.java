@@ -6,6 +6,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -37,4 +38,13 @@ public class Post extends BaseEntity{
     @JoinColumn(name = "user_id")
     @Schema(description = "작성자 정보")
     private User user;
+
+    public void updatePost(String title, String body) {
+        this.title = title;
+        this.body = body;
+    }
+
+    public void deletePost() {
+        setDeletedAt(LocalDateTime.now());
+    }
 }
