@@ -5,6 +5,7 @@ import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.Post;
 import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.PostRepository;
@@ -63,14 +64,15 @@ public class PostService {
     }
 
     @Transactional
-    public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName) {
+    public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName, String userRole) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+//        System.out.println("확인 = " + authentication.getAuthorities().iterator().next().getAuthority().equals(UserRole.ADMIN.getAuthority()));
 
-        if(!post.getUser().getUsername().equals(user.getUsername())) {
+        if(!userRole.equals(UserRole.ADMIN.getAuthority()) && !post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
@@ -83,14 +85,14 @@ public class PostService {
     }
 
     @Transactional
-    public PostRes deletePostById(Integer postId, String userName) {
+    public PostRes deletePostById(Integer postId, String userName, String userRole) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
-        if(!post.getUser().getUsername().equals(user.getUsername())) {
+        if(!userRole.equals(UserRole.ADMIN.getAuthority()) && !post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 

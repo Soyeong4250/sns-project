@@ -79,7 +79,7 @@ public class PostController {
         log.info("postId : {}", id);
         log.info("post title : {}", postEditReq.getTitle());
         log.info("post body : {}", postEditReq.getBody());
-        PostRes postRes = postService.updatePostById(id, postEditReq, authentication.getName());
+        PostRes postRes = postService.updatePostById(id, postEditReq, authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(postRes);
     }
 
@@ -92,7 +92,7 @@ public class PostController {
     @DeleteMapping("/{id}")
     public Response<PostRes> deletePostById(@PathVariable Integer id, Authentication authentication) {
         log.info("postId : {}", id);
-        PostRes postRes = postService.deletePostById(id, authentication.getName());
+        PostRes postRes = postService.deletePostById(id, authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(postRes);
     }
 }
