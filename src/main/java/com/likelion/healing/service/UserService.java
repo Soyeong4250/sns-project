@@ -12,13 +12,17 @@ import com.likelion.healing.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
@@ -27,6 +31,7 @@ public class UserService {
     private String secretKey;
     private long expireTime = 1000L * 60 * 60;
 
+    @Transactional
     public UserJoinRes join(UserJoinReq userJoinReq) {
         log.info("userName: {}", userJoinReq.getUserName());
         userRepository.findByUserName(userJoinReq.getUserName())
@@ -37,10 +42,11 @@ public class UserService {
         User user = userRepository.save(userJoinReq.toEntity(encoder.encode(userJoinReq.getPassword())));
         return UserJoinRes.builder()
                 .userId(user.getId())
-                .userName(user.getUserName())
+                .userName(user.getUsername())
                 .build();
     }
 
+    @Transactional
     public UserLoginRes login(UserLoginReq userLoginReq) {
         log.info("userName: {}", userLoginReq.getUserName());
 
@@ -57,7 +63,9 @@ public class UserService {
                 .build();
     }
 
-    public User getUserByUserName(String userName) {
+    @Transactional
+    @Override
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
     }
