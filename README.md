@@ -1,23 +1,24 @@
 # SNS PROJECT
 
-## 목차
-
-1. [프로젝트 소개](#프로젝트-소개)
-2. [Swagger]()
-
-
-
 ## 프로젝트 소개
 
 멋쟁이 사자처럼 최종 프로젝트로, SNS 개발을 위한 프로젝트 입니다.
 
-
+<br />
 
 ## Swagger
 
 도메인 적용 : http://soyeong.cloud:8080/swagger-ui/
 
 ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
+
+<br />
+
+## Architecture
+
+![image-20221227181107062](C:\PJT\healing-sns\assets\image-20221227181107062.png)
+
+<br />
 
 
 
@@ -82,6 +83,8 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 ✅  PathVariable로 id(포스트 번호)를 넘겨줌
 
+✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
+
 ✅ 포스트 상세 조회 성공 시 `200` 상태코드와 Response로 `SUCCESS` resultCode와  `조회한 포스트의 정보(id, title, body, userName, createdAt, lastModifiedAt)를 담은 result` return
 
 ✅ 포스트 상세 조회 성공의 경우를 `given().willReturn()` 을 이용하여 PostService를 통해 나오는 결과를 미리 예측하고 mock Test 진행 👉 Controller Test
@@ -105,6 +108,14 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 ✅ title과 body만을 입력으로 필요로 한다
 
 ✅ PathVariable로 id(포스트 번호)를 넘겨주며, `Authentication` 을 이용하여 현재 로그인한 회원에 대한 정보를 확인할 수 있어야 한다
+
+✅ userName를 통해 존재하는 회원인지 검증 후, 존재하지 않는다면 `ErrorCode.USERNAME_NOT_FOUND` 와 `~은(는) 없는 회원입니다.` return
+
+✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
+
+✅`ADMIN`이 아니거나 작성자와 불일치하는 경우 `ErrorCode.INVALID_PERMISSION`와 `사용자가 권한이 없습니다.` return
+
+✅ 권한이 `ADMIN`이라면 작성자와 불일치해도 수정 가능
 
 ✅ 수정 성공 시  `200` 상태코드와 Response로 `SUCCESS` resultCode와  `포스트 수정 완료 message와 postId를 담은 result` return
 
@@ -132,6 +143,16 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 #### 7️⃣ 포스트 삭제
 
 ✅ PathVariable로 id(포스트 번호)를 넘겨주며, `Authentication` 을 이용하여 현재 로그인한 회원에 대한 정보를 확인할 수 있어야 한다
+
+✅ userName를 통해 존재하는 회원인지 검증 후, 존재하지 않는다면 `ErrorCode.USERNAME_NOT_FOUND` 와 `~은(는) 없는 회원입니다.` return
+
+✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
+
+✅`ADMIN`이 아니거나 작성자와 불일치하는 경우 `ErrorCode.INVALID_PERMISSION`와 `사용자가 권한이 없습니다.` return
+
+✅ 권한이 `ADMIN`이라면 작성자와 불일치해도 포스트 삭제 가능
+
+✅ postId를 통해 존재하는 포스트인지 검증 후, 존재하지 않는다면 `ErrorCode.POST_NOT_FOUND` 와 `해당 포스트가 없습니다.` return
 
 ✅ 삭제 성공 시  `200` 상태코드와 Response로 `SUCCESS` resultCode와  `포스트 삭제 완료 message와 postId를 담은 result` return
 
@@ -170,11 +191,13 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 - 8️⃣ 회원 권한 수정 시 `USER` 권한을 가진 회원이 접근했을 때 발생하는 `403 Error`에 대한 예외처리를 하지 못한 점이 아쉬움
 - `@Secured` 외에도 사용자의 접근 권한에 대해 설정하는 어노테이션에 대해 학습이 더 필요
 - JPA의 Dirty Check (변경 감지) 에 대해 이번 개발을 진행하며 처음 알게 되어 추가로 학습을 할 예정
+- 프론트엔드를 추가하지 못한 점이 아쉬움
 
 
 
 **[참고한 자료 및  소스 코드]**
 
-- 이전에 학습했던 Git과 정리 내용 : https://github.com/Soyeong4250/spring-security-exercise
+- [Git] 이전에 학습했던 Git과 정리 내용 : https://github.com/Soyeong4250/spring-security-exercise
+- [도서] 스프링 부트 핵심 가이드
 
-- 교재 : 스프링 부트 핵심 가이드
+- [도서] 자바 ORM 표준 JPA 프로그래밍
