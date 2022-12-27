@@ -90,7 +90,7 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @DeleteMapping("/{id}")
-    public Response<PostRes> deletePostById(@PathVariable Integer id, Authentication authentication) {
+    public Response<PostRes> deletePostById(@PathVariable Integer id, Authentication authentication) throws SQLException {
         log.info("postId : {}", id);
         PostRes postRes = postService.deletePostById(id, authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(postRes);
