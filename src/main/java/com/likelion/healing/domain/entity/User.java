@@ -1,12 +1,17 @@
 package com.likelion.healing.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Entity
 @Table(name = "user")
@@ -18,7 +23,7 @@ import javax.persistence.*;
 @Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Schema(description = "회원")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,18 +35,58 @@ public class User extends BaseEntity {
     private String userName;
 
     @Column(nullable = false)
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(description = "회원 비밀번호")
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Schema(description = "회원 권한", defaultValue = "user", allowableValues = {"admin", "user"})
+    @Schema(description = "회원 권한", defaultValue = "USER", allowableValues = {"ADMIN", "USER"})
     private UserRole role;
 
     @Builder
-    public User(String userName, String password, UserRole role) {
+    public User(Integer id, String userName, String password) {
+        this.id = id;
         this.userName = userName;
         this.password = password;
-        this.role = role;
+        this.role = UserRole.USER;
+    }
+
+    public UserRole changeRole(UserRole role) {
+        return this.role = role;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        UserRole userRole = this.role;
+        String authority = userRole.getAuthority();
+
+        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(simpleGrantedAuthority);
+        return authorities;
+    }
+
+    public String getUsername() {
+        return this.userName;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
