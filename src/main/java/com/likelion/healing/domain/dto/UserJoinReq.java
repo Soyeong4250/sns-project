@@ -1,7 +1,6 @@
 package com.likelion.healing.domain.dto;
 
 import com.likelion.healing.domain.entity.User;
-import com.likelion.healing.domain.entity.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +24,6 @@ public class UserJoinReq {
         return User.builder()
                 .userName(this.userName)
                 .password(password)
-                .role(UserRole.USER)
                 .build();
     }
 }
