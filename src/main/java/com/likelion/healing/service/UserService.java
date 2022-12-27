@@ -1,10 +1,8 @@
 package com.likelion.healing.service;
 
-import com.likelion.healing.domain.dto.UserJoinReq;
-import com.likelion.healing.domain.dto.UserJoinRes;
-import com.likelion.healing.domain.dto.UserLoginReq;
-import com.likelion.healing.domain.dto.UserLoginRes;
+import com.likelion.healing.domain.dto.*;
 import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.UserRepository;
@@ -12,6 +10,7 @@ import com.likelion.healing.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -68,5 +67,23 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+    }
+
+    @Transactional
+    public UpdateUserRoleRes changeRole(Integer userId, UserRole role, Authentication authentication) {
+        log.info("authentication : {}", authentication.getAuthorities());
+//        if (!authentication.getAuthorities().equals(UserRole.ADMIN)) {  // 어떻게 비교해야할까..?
+//            System.out.println("pass");
+//            throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+//        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.")));
+
+        user.changeRole(role);
+        return UpdateUserRoleRes.builder()
+                                .message("권한 변경 완료")
+                                .role(role)
+                                .build();
     }
 }
