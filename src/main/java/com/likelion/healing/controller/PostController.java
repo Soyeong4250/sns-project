@@ -42,7 +42,7 @@ public class PostController {
         log.info("authentication : {}", authentication);
         log.info("userName : {}", userName);
         PostRes postRes = postService.addPost(postReq, userName);
-        return Response.success(new PostRes(postRes.getMessage(), postRes.getPostId()));
+        return Response.success(postRes);
     }
 
     @ApiOperation(value = "포스트 목록 조회", notes = "포스트 목록 조회 성공유무를 반환")
@@ -61,14 +61,14 @@ public class PostController {
             @ApiResponse(code = 200, message = "포스트 상세 조회 성공"),
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환")
     })
-    @GetMapping("/{postId}")
-    public Response<PostViewRes> getPostById(@PathVariable Integer postId) throws SQLException {
-        log.info("postId : {}", postId);
-        PostViewRes postRes = postService.getPostById(postId);
-        return Response.success(new PostViewRes(postRes.getId(), postRes.getTitle(), postRes.getBody(), postRes.getUserName(), postRes.getCreatedAt(), postRes.getLastModifiedAt()));
+    @GetMapping("/{id}")
+    public Response<PostViewRes> getPostById(@PathVariable Integer id) throws SQLException {
+        log.info("postId : {}", id);
+        PostViewRes postRes = postService.getPostById(id);
+        return Response.success(postRes);
     }
 
-    @ApiOperation(value = "포스트 수정", notes = "postId - PathVariable, 수정할 포스트 - RequestBody, Token - Authorization을 입력받아 포스트 수정 성공유무 반환")
+    @ApiOperation(value = "포스트 수정", notes = "id - PathVariable, 수정할 포스트 - RequestBody, Token - Authorization을 입력받아 포스트 수정 성공유무 반환")
     @ApiResponses({
             @ApiResponse(code = 200, message = "포스트 수정 성공"),
             @ApiResponse(code = 401, message = "현재 로그인한 회원을 찾지못하는 경우, 작성자와 현재 로그인한 회원이 불일치한 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
@@ -83,7 +83,7 @@ public class PostController {
         return Response.success(postRes);
     }
 
-    @ApiOperation(value = "포스트 삭제", notes = "postId - PathVariable, Token - Authorization을 입력받아 포스트 삭제 성공유무 반환")
+    @ApiOperation(value = "포스트 삭제", notes = "id - PathVariable, Token - Authorization을 입력받아 포스트 삭제 성공유무 반환")
     @ApiResponses({
             @ApiResponse(code = 200, message = "포스트 삭제 성공"),
             @ApiResponse(code = 401, message = "현재 로그인한 회원을 찾지못하는 경우, 작성자와 현재 로그인한 회원이 불일치한 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
