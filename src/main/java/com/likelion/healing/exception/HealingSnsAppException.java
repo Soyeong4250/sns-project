@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class HealingSnsAppException extends  RuntimeException{
+public class HealingSnsAppException extends RuntimeException{
 
     private ErrorCode errorCode;
     private String message;
