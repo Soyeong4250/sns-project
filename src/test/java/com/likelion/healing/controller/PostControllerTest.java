@@ -5,7 +5,6 @@ import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.User;
-import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.PostService;
@@ -172,11 +171,10 @@ class PostControllerTest {
         User user = User.builder()
                 .userName("Soyeong")
                 .password("12345")
-                .role(UserRole.USER)
                 .build();
         Integer postId = 1;
 
-        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUserName())));
+        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
 
         mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                         .with(csrf())
@@ -279,11 +277,10 @@ class PostControllerTest {
         User user = User.builder()
                 .userName("Soyeong")
                 .password("12345")
-                .role(UserRole.USER)
                 .build();
         Integer postId = 1;
 
-        given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUserName())));
+        given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
 
         mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                         .with(csrf()))
