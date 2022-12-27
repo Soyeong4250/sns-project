@@ -18,7 +18,7 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 !(./assets/image-20221227181107062.png)
 
-![image-20221227182015912](./assets/image-20221227182015912.png)
+![image-20221227190312548](./assets/image-20221227190312548.png)
 
 <br />
 
@@ -37,6 +37,7 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 **[필수 과제]**
 
 - [x] GitLab CI/CD를 이용한 Docker 자동 배포 
+- [x] Swagger 적용
 - [x] 회원가입
 - [x] 로그인
 - [x] 포스트 CRUD
