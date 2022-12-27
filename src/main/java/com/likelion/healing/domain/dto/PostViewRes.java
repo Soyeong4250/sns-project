@@ -42,7 +42,7 @@ public class PostViewRes {
                 .id(post.getId())
                 .title(post.getTitle())
                 .body(post.getBody())
-                .userName(post.getUser().getUserName())
+                .userName(post.getUser().getUsername())
                 .createdAt(post.getCreatedAt())
                 .lastModifiedAt(post.getUpdatedAt())
                 .build();
