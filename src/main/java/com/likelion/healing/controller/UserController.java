@@ -1,10 +1,8 @@
 package com.likelion.healing.controller;
 
-import com.likelion.healing.domain.dto.UserJoinReq;
-import com.likelion.healing.domain.dto.UserJoinRes;
-import com.likelion.healing.domain.dto.UserLoginReq;
-import com.likelion.healing.domain.dto.UserLoginRes;
+import com.likelion.healing.domain.dto.*;
 import com.likelion.healing.domain.entity.Response;
+import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,10 +10,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -48,5 +44,13 @@ public class UserController {
     public Response<UserLoginRes> login(@RequestBody UserLoginReq userLoginReq) {
         log.debug("login() 실행");
         return Response.success(userService.login(userLoginReq));
+    }
+
+//    @Secured(UserRole.Authority.ADMIN)  // 어떻게 적용해야할까?
+    @PostMapping("/{userId}/role/change")
+    public Response<UpdateUserRoleRes> updateRole(@PathVariable Integer userId, @RequestBody UpdateUserRoleReq role, Authentication authentication) throws HealingSnsAppException {
+        log.info("authentication.getAuthorities : {}", authentication.getAuthorities());
+        UpdateUserRoleRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication);
+        return Response.success(updateUserRoleRes);
     }
 }
