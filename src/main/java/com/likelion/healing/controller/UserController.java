@@ -2,7 +2,7 @@ package com.likelion.healing.controller;
 
 import com.likelion.healing.domain.dto.*;
 import com.likelion.healing.domain.entity.Response;
-import com.likelion.healing.exception.HealingSnsAppException;
+import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,11 +47,11 @@ public class UserController {
         return Response.success(userService.login(userLoginReq));
     }
 
-//    @Secured(UserRole.Authority.ADMIN)  // 어떻게 적용해야할까?
+    @Secured(UserRole.Authority.ADMIN)
     @PostMapping("/{userId}/role/change")
-    public Response<UpdateUserRoleRes> updateRole(@PathVariable Integer userId, @RequestBody UpdateUserRoleReq role, Authentication authentication) throws HealingSnsAppException {
+    public Response<UpdateUserRoleRes> updateRole(@PathVariable Integer userId, @RequestBody UpdateUserRoleReq role, Authentication authentication) {
         log.info("authentication.getAuthorities : {}", authentication.getAuthorities());
-        UpdateUserRoleRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication);
+        UpdateUserRoleRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(updateUserRoleRes);
     }
 }
