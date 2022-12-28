@@ -41,7 +41,7 @@ public class PostEntity extends BaseEntity{
     @JoinColumn(name = "user_id")
     @NotBlank
     @Schema(description = "작성자 정보")
-    private User user;
+    private UserEntity user;
 
     public void updatePost(String title, String body) {
         this.title = title;
