@@ -1,7 +1,7 @@
 package com.likelion.healing.service;
 
 import com.likelion.healing.domain.dto.*;
-import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
@@ -37,7 +37,7 @@ public class UserService implements UserDetailsService {
                     throw new HealingSnsAppException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s은(는) 이미 있습니다.", userJoinReq.getUserName()));
                 });
 
-        User user = userRepository.save(userJoinReq.toEntity(encoder.encode(userJoinReq.getPassword())));
+        UserEntity user = userRepository.save(userJoinReq.toEntity(encoder.encode(userJoinReq.getPassword())));
         return UserJoinRes.builder()
                 .userId(user.getId())
                 .userName(user.getUsername())
@@ -48,7 +48,7 @@ public class UserService implements UserDetailsService {
     public UserLoginRes login(UserLoginReq userLoginReq) {
         log.info("userName: {}", userLoginReq.getUserName());
 
-        User user = userRepository.findByUserName(userLoginReq.getUserName())
+        UserEntity user = userRepository.findByUserName(userLoginReq.getUserName())
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userLoginReq.getUserName())));
 
         if(!encoder.matches(userLoginReq.getPassword(), user.getPassword())) {
@@ -76,7 +76,7 @@ public class UserService implements UserDetailsService {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
-        User user = userRepository.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.")));
 
         user.changeRole(changeRole);

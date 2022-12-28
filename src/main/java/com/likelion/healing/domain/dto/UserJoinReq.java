@@ -1,6 +1,6 @@
 package com.likelion.healing.domain.dto;
 
-import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +20,8 @@ public class UserJoinReq {
     @Schema(description = "회원 비밀번호")
     private String password;
 
-    public User toEntity(String password) {
-        return User.builder()
+    public UserEntity toEntity(String password) {
+        return UserEntity.builder()
                 .userName(this.userName)
                 .password(password)
                 .build();

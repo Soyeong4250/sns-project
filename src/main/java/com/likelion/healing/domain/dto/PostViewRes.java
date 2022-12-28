@@ -1,7 +1,7 @@
 package com.likelion.healing.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.likelion.healing.domain.entity.Post;
+import com.likelion.healing.domain.entity.PostEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +37,7 @@ public class PostViewRes {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime lastModifiedAt;
 
-    public static PostViewRes of(Post post) {
+    public static PostViewRes of(PostEntity post) {
         return PostViewRes.builder()
                 .id(post.getId())
                 .title(post.getTitle())

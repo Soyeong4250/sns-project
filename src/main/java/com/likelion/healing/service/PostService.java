@@ -3,8 +3,8 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.Post;
-import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.PostEntity;
+import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
@@ -27,17 +27,17 @@ public class PostService {
 
     @Transactional
     public PostRes addPost(PostReq postReq, String userName) {
-        User user = userRepository.findByUserName(userName)
+        UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
-        Post post = Post.builder()
+        PostEntity post = PostEntity.builder()
                 .title(postReq.getTitle())
                 .body(postReq.getBody())
                 .user(user)
                 .build();
-        Post savedPost = postRepository.save(post);
+        PostEntity savedPostEntity = postRepository.save(post);
         return PostRes.builder()
-                .postId(savedPost.getId())
+                .postId(savedPostEntity.getId())
                 .message("포스트 등록 완료")
                 .build();
     }
@@ -50,7 +50,7 @@ public class PostService {
 
     @Transactional
     public PostViewRes getPostById(Integer postId) {
-        Post post = postRepository.findById(postId)
+        PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         return PostViewRes.builder()
@@ -65,10 +65,10 @@ public class PostService {
 
     @Transactional
     public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName, String userRole) {
-        Post post = postRepository.findById(postId)
+        PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        User user = userRepository.findByUserName(userName)
+        UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 //        System.out.println("확인 = " + authentication.getAuthorities().iterator().next().getAuthority().equals(UserRole.ADMIN.getAuthority()));
 
@@ -86,10 +86,10 @@ public class PostService {
 
     @Transactional
     public PostRes deletePostById(Integer postId, String userName, String userRole) {
-        Post post = postRepository.findById(postId)
+        PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        User user = userRepository.findByUserName(userName)
+        UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
         if(!userRole.equals(UserRole.ADMIN.getAuthority()) && !post.getUser().getUsername().equals(user.getUsername())) {
