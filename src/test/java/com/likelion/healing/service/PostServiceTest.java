@@ -52,7 +52,7 @@ class PostServiceTest {
 
         User givenUser = mock(User.class);
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
+                .thenReturn(Optional.empty());
 
         Post mockPost = mock(Post.class);
         Mockito.when(postRepository.save(any(Post.class)))
@@ -101,7 +101,7 @@ class PostServiceTest {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
         Mockito.when(postRepository.findById(fixture.getPostId()))
-                .thenThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+                .thenReturn(Optional.empty());
 
         try {
             PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName(), fixture.getRole().name());
@@ -143,7 +143,7 @@ class PostServiceTest {
                 .thenReturn(Optional.of(mockPost));
 
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
+                .thenReturn(Optional.empty());
 
         Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
         Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
@@ -166,7 +166,7 @@ class PostServiceTest {
                 .thenReturn(Optional.of(mockPost));
 
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
+                .thenReturn(Optional.empty());
 
         Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
         Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
@@ -185,7 +185,7 @@ class PostServiceTest {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
         Mockito.when(postRepository.findById(fixture.getPostId()))
-                .thenThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+                .thenReturn(Optional.empty());
 
         try {
             PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName(), fixture.getRole().name());
