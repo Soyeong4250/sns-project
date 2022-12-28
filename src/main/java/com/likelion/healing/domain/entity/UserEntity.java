@@ -26,7 +26,7 @@ import java.util.Collection;
 @Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Schema(description = "회원")
-public class User extends BaseEntity implements UserDetails {
+public class UserEntity extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,7 +52,7 @@ public class User extends BaseEntity implements UserDetails {
     private UserRole role;
 
     @Builder
-    public User(Integer id, String userName, String password) {
+    public UserEntity(Integer id, String userName, String password) {
         this.id = id;
         this.userName = userName;
         this.password = password;
