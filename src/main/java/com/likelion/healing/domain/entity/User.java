@@ -5,11 +5,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -31,10 +34,15 @@ public class User extends BaseEntity implements UserDetails {
     private Integer id;
 
     @Column(unique = true)
+    @NotBlank
+    @Length(min = 3, max = 20)
+    @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9_-]{3,20}$")
     @Schema(description = "회원 이름")
     private String userName;
 
     @Column(nullable = false)
+    @NotBlank
+    @Length(min = 8, max = 50)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(description = "회원 비밀번호")
     private String password;
