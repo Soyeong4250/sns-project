@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.PostService;
@@ -167,7 +167,7 @@ class PostControllerTest {
                 .title("test title")
                 .body("test body")
                 .build();
-        User user = User.builder()
+        UserEntity user = UserEntity.builder()
                 .userName("Soyeong")
                 .password("12345")
                 .build();
@@ -273,7 +273,7 @@ class PostControllerTest {
     @WithAnonymousUser
     @DisplayName("포스트 삭제 실패 - 인증 실패")
     void delete_authenticationFailed() throws Exception {
-        User user = User.builder()
+        UserEntity user = UserEntity.builder()
                 .userName("Soyeong")
                 .password("12345")
                 .build();
