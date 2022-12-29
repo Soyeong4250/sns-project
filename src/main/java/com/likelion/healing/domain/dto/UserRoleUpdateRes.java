@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @Schema(description = "권한 변경 응답 dto")
-public class UpdateUserRoleRes {
+public class UserRoleUpdateRes {
 
     @Schema(description = "로직 수행 결과")
     private String message;
