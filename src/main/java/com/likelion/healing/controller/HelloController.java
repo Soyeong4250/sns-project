@@ -26,7 +26,7 @@ public class HelloController {
         return "이소영";
     }
 
-    @ApiOperation(value = "모든 자릿수의 합 출력해보기", notes = "PostMapping을 이용하여 sumOfDigit 결과를 출력합니다.")
+    @ApiOperation(value = "모든 자릿수의 합 출력해보기", notes = "GetMapping을 이용하여 sumOfDigit 결과를 출력합니다.")
     @GetMapping("/{num}")
     public Integer sumOfDigit(@PathVariable Integer num) {
         return algorithmService.sumOfDigit(num);
