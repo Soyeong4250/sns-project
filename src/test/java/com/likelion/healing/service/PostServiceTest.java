@@ -3,8 +3,8 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.Post;
-import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.PostEntity;
+import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.fixture.PostEntityFixture;
@@ -33,13 +33,13 @@ class PostServiceTest {
     void successfulAddPost() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        User mockUser = mock(User.class);
-        Post mockPost = mock(Post.class);
+        UserEntity mockUser = mock(UserEntity.class);
+        PostEntity mockPost = mock(PostEntity.class);
 
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
                 .thenReturn(Optional.of(mockUser));
 
-        Mockito.when(postRepository.save(any(Post.class)))
+        Mockito.when(postRepository.save(any(PostEntity.class)))
                 .thenReturn(mockPost);
 
         Assertions.assertDoesNotThrow(() -> postService.addPost(new PostReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
@@ -50,12 +50,12 @@ class PostServiceTest {
     void notFoundWriter() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        User givenUser = mock(User.class);
+        UserEntity givenUser = mock(UserEntity.class);
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
                 .thenReturn(Optional.empty());
 
-        Post mockPost = mock(Post.class);
-        Mockito.when(postRepository.save(any(Post.class)))
+        PostEntity mockPost = mock(PostEntity.class);
+        Mockito.when(postRepository.save(any(PostEntity.class)))
                 .thenReturn(mockPost);
 
         try {
@@ -72,13 +72,13 @@ class PostServiceTest {
     @DisplayName("포스트 단건 조회 성공")
     void successfulGetPostById() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-        User givenUser = User.builder()
+        UserEntity givenUser = UserEntity.builder()
                             .userName(fixture.getUserName())
                             .build();
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
                 .thenReturn(Optional.of(givenUser));
 
-        Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
+        PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
 
         Mockito.when(postRepository.findById(any(Integer.class)))
                 .thenReturn(Optional.of(givenPost));
@@ -113,9 +113,9 @@ class PostServiceTest {
     @Test
     @DisplayName("포스트 수정 실패 - 작성자와 유저가 일치하지 않는 경우")
     void update_notFoundUser() {
-        User givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
-        User givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
-        Post givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
+        UserEntity givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
+        UserEntity givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
+        PostEntity givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
 
         Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
                 .thenReturn(Optional.of(givenUser2));
@@ -138,15 +138,15 @@ class PostServiceTest {
     void update_mismatchedAuthorAndUser() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        Post mockPost = mock(Post.class);
+        PostEntity mockPost = mock(PostEntity.class);
         Mockito.when(postRepository.findById(fixture.getPostId()))
                 .thenReturn(Optional.of(mockPost));
 
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
                 .thenReturn(Optional.empty());
 
-        Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
-        Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
+        PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
+        Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
         try {
             PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName(), fixture.getRole().name());
         } catch (HealingSnsAppException e) {
@@ -161,15 +161,15 @@ class PostServiceTest {
     void delete_mismatchedAuthorAndUser() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        Post mockPost = mock(Post.class);
+        PostEntity mockPost = mock(PostEntity.class);
         Mockito.when(postRepository.findById(fixture.getPostId()))
                 .thenReturn(Optional.of(mockPost));
 
         Mockito.when(userRepository.findByUserName(fixture.getUserName()))
                 .thenReturn(Optional.empty());
 
-        Post givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
-        Mockito.when(postRepository.save(any(Post.class))).thenReturn(givenPost);
+        PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
+        Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
         try {
             PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName(), fixture.getRole().name());
         } catch (HealingSnsAppException e) {
@@ -197,9 +197,9 @@ class PostServiceTest {
     @Test
     @DisplayName("포스트 삭제 실패 - 작성자와 유저가 일치하지 않는 경우")
     void delete_notFoundEditUser() {
-        User givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
-        User givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
-        Post givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
+        UserEntity givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
+        UserEntity givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
+        PostEntity givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
 
         Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
                 .thenReturn(Optional.of(givenUser2));
