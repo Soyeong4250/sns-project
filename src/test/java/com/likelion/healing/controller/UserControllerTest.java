@@ -139,4 +139,29 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.message").value("회원 이름 또는 비밀번호를 다시 확인해주세요."))
                 .andDo(print());
     }
+
+    /*@Test
+    @WithMockUser
+    @DisplayName("권한 수정 성공 - ADMIN")
+    void changeRoleTest() throws Exception {
+        UserRoleUpdateReq req = UserRoleUpdateReq.builder()
+                                                .role(UserRole.ADMIN)
+                                                .build();
+        UserRoleUpdateRes res = UserRoleUpdateRes.builder()
+                                                .message("권한 변경 완료")
+                                                .role(UserRole.ADMIN)
+                                                .build();
+
+        given(userService.changeRole(any(Integer.class), any(UserRole.class), any(String.class), any(String.class)))
+                .willReturn(res);
+
+        mockMvc.perform(post(String.format("/api/v1/users/%d/role/change", 3))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(req)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.message").value("권한 변경 완료"))
+                .andExpect(jsonPath("$.result.role").value(UserRole.ADMIN));
+    }*/
 }
