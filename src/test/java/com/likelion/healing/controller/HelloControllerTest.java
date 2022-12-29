@@ -32,7 +32,7 @@ class HelloControllerTest {
     @Test
     @WithMockUser
     @DisplayName("sumOfDigit 성공")
-    void successfulSumOfDigit() throws Exception {
+    void SumOfDigitTest() throws Exception {
         Integer num = 6567;
         Integer sum = 24;
 
