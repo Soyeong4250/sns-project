@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/users/join", "/api/v1/users/login").permitAll()
+                .antMatchers("/api/v1/users/join", "/api/v1/users/login", "/api/v1/hello/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
                 .antMatchers("**exception**").permitAll()
 //                .antMatchers("/api/v1/users/{userId}/role/change").hasRole("ADMIN")
