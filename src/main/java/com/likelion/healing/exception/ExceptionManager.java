@@ -24,4 +24,11 @@ public class ExceptionManager {
                 .body(Response.error(errorResult));
     }
 
+    @ExceptionHandler(ArithmeticException.class)
+    public ResponseEntity<?> byZeroExceptionHandler(ArithmeticException e) {
+        ErrorResult errorResult = new ErrorResult(ErrorCode.BY_ZERO_ERROR, e.getMessage());
+        return ResponseEntity.status(errorResult.getErrorCode().getStatus())
+                .body(Response.error(errorResult));
+    }
+
 }
