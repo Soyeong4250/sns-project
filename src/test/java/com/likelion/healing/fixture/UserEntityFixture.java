@@ -1,19 +1,19 @@
 package com.likelion.healing.fixture;
 
-import com.likelion.healing.domain.entity.User;
+import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.domain.entity.UserRole;
 
 import java.time.LocalDateTime;
 
 public class UserEntityFixture {
 
-    public static User get(String userName, String password) {
-        User userEntity = new User();
-        userEntity.setId(1);
-        userEntity.setUserName(userName);
-        userEntity.setPassword(password);
-        userEntity.setRole(UserRole.USER);
-        userEntity.setCreatedAt(LocalDateTime.now());
-        return userEntity;
+    public static UserEntity get(String userName, String password) {
+        UserEntity user = new UserEntity();
+        user.setId(1);
+        user.setUserName(userName);
+        user.setPassword(password);
+        user.setRole(UserRole.USER);
+        user.setCreatedAt(LocalDateTime.now());
+        return user;
     }
 }
