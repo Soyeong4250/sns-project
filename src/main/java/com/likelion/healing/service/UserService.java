@@ -69,18 +69,21 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UpdateUserRoleRes changeRole(Integer userId, UserRole changeRole, String userName, String role) {
+    public UserRoleUpdateRes changeRole(Integer userId, UserRole changeRole, String userName, String role) {
         log.info("authentication : {}", role);
         if (!role.equals(UserRole.ADMIN.getAuthority())) {
             System.out.println("pass");
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
+        userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.")));
 
         user.changeRole(changeRole);
-        return UpdateUserRoleRes.builder()
+        return UserRoleUpdateRes.builder()
                                 .message("권한 변경 완료")
                                 .role(changeRole)
                                 .build();
