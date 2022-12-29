@@ -54,9 +54,9 @@ public class UserController {
     })
     @Secured(UserRole.Authority.ADMIN)
     @PostMapping("/{userId}/role/change")
-    public Response<UpdateUserRoleRes> updateRole(@PathVariable Integer userId, @RequestBody UpdateUserRoleReq role, Authentication authentication) {
+    public Response<UserRoleUpdateRes> updateRole(@PathVariable Integer userId, @RequestBody UserRoleUpdateReq role, Authentication authentication) {
         log.info("authentication.getAuthorities : {}", authentication.getAuthorities());
-        UpdateUserRoleRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
+        UserRoleUpdateRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(updateUserRoleRes);
     }
 }
