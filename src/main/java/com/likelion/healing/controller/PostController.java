@@ -18,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.sql.SQLException;
 
 @RestController
@@ -36,7 +37,7 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환")
     })
     @PostMapping()
-    public Response<PostRes> addPost(@RequestBody PostReq postReq, Authentication authentication) throws SQLException  {
+    public Response<PostRes> addPost(@Valid @RequestBody PostReq postReq, Authentication authentication) throws SQLException  {
         log.info("title : {}, body : {}", postReq.getTitle(), postReq.getBody());
         String userName = authentication.getName();
         log.info("authentication : {}", authentication);
@@ -75,7 +76,7 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @PutMapping("/{id}")
-    public Response<PostRes> updatePostById(@PathVariable Integer id, @RequestBody PostReq postEditReq, Authentication authentication) throws SQLException {
+    public Response<PostRes> updatePostById(@PathVariable Integer id, @Valid @RequestBody PostReq postEditReq, Authentication authentication) throws SQLException {
         log.info("postId : {}", id);
         log.info("post title : {}", postEditReq.getTitle());
         log.info("post body : {}", postEditReq.getBody());
