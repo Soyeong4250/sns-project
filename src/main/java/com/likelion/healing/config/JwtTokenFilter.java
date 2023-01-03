@@ -1,6 +1,7 @@
-package com.likelion.healing.util;
+package com.likelion.healing.config;
 
 import com.likelion.healing.service.UserService;
+import com.likelion.healing.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
