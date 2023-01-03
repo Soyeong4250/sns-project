@@ -14,6 +14,8 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class UserController {
             @ApiResponse(code = 409, message = "중복 회원 존재 👉 DUPLICATED_USER_NAME, 에러 메세지 반환"),
     })
     @PostMapping("/join")
-    public Response<UserJoinRes> join(@RequestBody UserJoinReq userJoinReq) {
+    public Response<UserJoinRes> join(@Valid @RequestBody UserJoinReq userJoinReq) {
         log.debug("join() 실행");
         UserJoinRes userDto = userService.join(userJoinReq);
         return Response.success(new UserJoinRes(userDto.getUserId(), userDto.getUserName()));
@@ -42,7 +44,7 @@ public class UserController {
             @ApiResponse(code = 401, message = "비밀번호 일치하지 않음 👉 INVALID_PASSWORD, 에러 메세지 반환")
     })
     @PostMapping("/login")
-    public Response<UserLoginRes> login(@RequestBody UserLoginReq userLoginReq) {
+    public Response<UserLoginRes> login(@Valid @RequestBody UserLoginReq userLoginReq) {
         log.debug("login() 실행");
         return Response.success(userService.login(userLoginReq));
     }
