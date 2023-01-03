@@ -1,5 +1,6 @@
 package com.likelion.healing.domain.dto;
 
+import com.likelion.healing.domain.entity.CommentEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,4 +14,9 @@ public class CommentReq {
 
     private String comment;
 
+    public CommentEntity toEntity() {
+        return CommentEntity.builder()
+                .comment(this.comment)
+                .build();
+    }
 }
