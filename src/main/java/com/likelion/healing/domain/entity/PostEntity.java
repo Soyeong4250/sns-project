@@ -6,7 +6,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 
@@ -28,18 +27,15 @@ public class PostEntity extends BaseEntity{
     private Integer id;
 
     @Column(nullable = false)
-    @NotBlank
     @Schema(description = "포스트 제목")
     private String title;
 
     @Column(nullable = false, length = 300)
-    @NotBlank
     @Schema(description = "포스트 내용")
     private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    @NotBlank
     @Schema(description = "작성자 정보")
     private UserEntity user;
 
