@@ -1,7 +1,6 @@
 package com.likelion.healing.config;
 
 import com.likelion.healing.service.UserService;
-import com.likelion.healing.util.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
