@@ -12,6 +12,8 @@ import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,5 +40,13 @@ public class CommentService {
         commentRepository.save(commentEntity);
         log.info("commentEntity id: {}", commentEntity.getId());
         return CommentRes.of(commentEntity);
+    }
+
+    public Page<CommentRes> getCommentList(Integer postId, Pageable pageable) {
+       postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 포스트가 존재하지 않습니다.", postId)));
+
+        Page<CommentRes> commentList = commentRepository.findAllByPostIdOrderByCreatedAt(pageable).map(CommentRes::of);
+        return commentList;
     }
 }
