@@ -1,7 +1,7 @@
 package com.likelion.healing.service;
 
-import com.likelion.healing.domain.dto.CommentAddRes;
 import com.likelion.healing.domain.dto.CommentReq;
+import com.likelion.healing.domain.dto.CommentRes;
 import com.likelion.healing.domain.entity.CommentEntity;
 import com.likelion.healing.domain.entity.PostEntity;
 import com.likelion.healing.domain.entity.UserEntity;
@@ -25,7 +25,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public CommentAddRes createComment(Integer postId, CommentReq commentReq, String userName) {
+    public CommentRes createComment(Integer postId, CommentReq commentReq, String userName) {
 
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 포스트가 존재하지 않습니다.", postId)));
@@ -37,6 +37,6 @@ public class CommentService {
         commentEntity.setPost(post);
         commentRepository.save(commentEntity);
         log.info("commentEntity id: {}", commentEntity.getId());
-        return CommentAddRes.of(commentEntity);
+        return CommentRes.of(commentEntity);
     }
 }

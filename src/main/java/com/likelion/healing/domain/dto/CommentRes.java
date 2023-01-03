@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Builder
-public class CommentAddRes {
+public class CommentRes {
 
     private Integer id;
     private String comment;
@@ -21,8 +21,8 @@ public class CommentAddRes {
     private LocalDateTime createdAt;
     private LocalDateTime lastModifiedAt;
 
-    public static CommentAddRes of(CommentEntity commentEntity) {
-        return CommentAddRes.builder()
+    public static CommentRes of(CommentEntity commentEntity) {
+        return CommentRes.builder()
                 .id(commentEntity.getId())
                 .comment(commentEntity.getComment())
                 .userName(commentEntity.getUser().getUsername())

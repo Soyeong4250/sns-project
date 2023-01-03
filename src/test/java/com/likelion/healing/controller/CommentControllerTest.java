@@ -1,8 +1,8 @@
 package com.likelion.healing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.likelion.healing.domain.dto.CommentAddRes;
 import com.likelion.healing.domain.dto.CommentReq;
+import com.likelion.healing.domain.dto.CommentRes;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.CommentService;
@@ -54,7 +54,7 @@ class CommentControllerTest {
                     .build();
 
             LocalDateTime nowTime = LocalDateTime.now();
-            CommentAddRes comment = CommentAddRes.builder()
+            CommentRes comment = CommentRes.builder()
                                                 .id(1)
                                                 .comment("comment")
                                                 .postId(3)
@@ -90,7 +90,7 @@ class CommentControllerTest {
                     .build();
 
             LocalDateTime nowTime = LocalDateTime.now();
-            CommentAddRes comment = CommentAddRes.builder()
+            CommentRes comment = CommentRes.builder()
                                                 .id(1)
                                                 .comment("comment")
                                                 .postId(3)
