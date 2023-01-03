@@ -21,9 +21,9 @@ public class CommentController {
 
     @PostMapping
     public Response<CommentRes> createComment(@PathVariable Integer postId, @Valid @RequestBody CommentReq commentReq, Authentication authentication) {
+        log.debug("createComment() 실행");
         log.info("comment : {}", commentReq.getComment());
         String userName = authentication.getName();
-        CommentRes commentAddRes = commentService.createComment(postId, commentReq, userName);
-        return Response.success(commentAddRes);
+        return Response.success(commentService.createComment(postId, commentReq, userName));
     }
 }
