@@ -2,7 +2,6 @@ package com.likelion.healing.controller;
 
 import com.likelion.healing.domain.dto.CommentAddRes;
 import com.likelion.healing.domain.dto.CommentReq;
-import com.likelion.healing.domain.entity.CommentEntity;
 import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.service.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +20,10 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public Response<CommentAddRes> addComment(@PathVariable Integer postId, @Valid @RequestBody CommentReq commentReq, Authentication authentication) {
+    public Response<CommentAddRes> createComment(@PathVariable Integer postId, @Valid @RequestBody CommentReq commentReq, Authentication authentication) {
         log.info("comment : {}", commentReq.getComment());
         String userName = authentication.getName();
-        CommentEntity savedComment = commentService.addCommentByPostId(postId, commentReq, userName);
-        return Response.success(CommentAddRes.of(savedComment));
+        CommentAddRes commentAddRes = commentService.createComment(postId, commentReq, userName);
+        return Response.success(commentAddRes);
     }
 }
