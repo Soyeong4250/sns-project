@@ -49,10 +49,12 @@ class CommentControllerTest {
     ObjectMapper objectMapper;
 
     private Integer postId;
+    private Integer commentId;
 
     @BeforeEach
     void setUp() {
         postId = 3;
+        commentId = 1;
     }
 
     @Nested
@@ -173,8 +175,6 @@ class CommentControllerTest {
     @Nested
     @DisplayName("댓글 수정 테스트")
     class UpdateCommentTest {
-        private Integer commentId = 1;
-
         @Test
         @DisplayName("댓글 수정 성공")
         void successfulUpdateComment() throws Exception {
@@ -259,7 +259,6 @@ class CommentControllerTest {
                     .title("test title")
                     .body("test body")
                     .build();
-            Integer postId = 1;
 
             given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
                     .willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
@@ -275,7 +274,6 @@ class CommentControllerTest {
                     .andExpect(jsonPath("$.result.message").value("DB 에러"));
         }
     }
-
 
 
 }
