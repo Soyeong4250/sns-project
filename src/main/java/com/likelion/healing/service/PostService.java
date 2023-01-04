@@ -44,7 +44,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostViewRes> getPostList(Pageable pageable) {
-        Page<PostViewRes> postList = postRepository.findAllByOrderByCreatedAtDesc(pageable).map(PostViewRes::of);
+        Page<PostViewRes> postList = postRepository.findAll(pageable).map(PostViewRes::of);
         return postList;
     }
 
