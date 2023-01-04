@@ -35,9 +35,11 @@ public class PostService {
                 .body(postReq.getBody())
                 .user(user)
                 .build();
-        PostEntity savedPostEntity = postRepository.save(post);
+        postRepository.save(post);
+        log.info("postId : {}", post.getId());
+
         return PostRes.builder()
-                .postId(savedPostEntity.getId())
+                .postId(post.getId())
                 .message("포스트 등록 완료")
                 .build();
     }
