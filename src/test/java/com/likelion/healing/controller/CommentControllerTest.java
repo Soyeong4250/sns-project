@@ -3,6 +3,7 @@ package com.likelion.healing.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
+import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.CommentService;
@@ -29,14 +30,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CommentController.class)
-@WithMockUser(username = "test", roles = "USER")
+@WithMockUser(roles = "USER")
 class CommentControllerTest {
 
     @Autowired
@@ -169,5 +169,113 @@ class CommentControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"));
 
     }
+
+    @Nested
+    @DisplayName("댓글 수정 테스트")
+    class UpdateCommentTest {
+        private Integer commentId = 1;
+
+        @Test
+        @DisplayName("댓글 수정 성공")
+        void successfulUpdateComment() throws Exception {
+            CommentReq req = CommentReq.builder()
+                    .comment("update")
+                    .build();
+
+            LocalDateTime nowTime = LocalDateTime.now();
+            CommentRes comment = CommentRes.builder()
+                    .id(commentId)
+                    .comment("update")
+                    .postId(postId)
+                    .userName("test")
+                    .createdAt(nowTime)
+                    .lastModifiedAt(nowTime)
+                    .build();
+
+            given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
+                    .willReturn(comment);
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.id").value(1))
+                    .andExpect(jsonPath("$.result.comment").value("update"))
+                    .andExpect(jsonPath("$.result.postId").value(3))
+                    .andExpect(jsonPath("$.result.userName").value("test"))
+                    .andExpect(jsonPath("$.result.createdAt").exists())
+                    .andExpect(jsonPath("$.result.lastModifiedAt").exists());
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("댓글 수정 실패 - 인증 실패")
+        void NotFoundedUser() throws Exception {
+            CommentReq req = CommentReq.builder()
+                    .comment("update")
+                    .build();
+
+            String userName = "test";
+
+            given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다", userName)));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("댓글 수정 실패 - 작성자 불일치")
+        void update_mismatchedAuthorAndUser() throws Exception {
+            CommentReq req = CommentReq.builder()
+                    .comment("update")
+                    .build();
+
+            given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다"));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                    .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다"));
+        }
+
+        @Test
+        @DisplayName("댓글 수정 실패 - 데이터베이스 에러")
+        void update_notFoundDatabase() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("test title")
+                    .body("test body")
+                    .build();
+            Integer postId = 1;
+
+            given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
+                    .andExpect(jsonPath("$.result.message").value("DB 에러"));
+        }
+    }
+
+
 
 }
