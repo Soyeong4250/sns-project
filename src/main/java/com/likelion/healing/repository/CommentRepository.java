@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
-    Page<CommentEntity> findAllByPostIdOrderByCreatedAt(Pageable pageable);
+    Page<CommentEntity> findByPostId(Integer postId, Pageable pageable);
 }
