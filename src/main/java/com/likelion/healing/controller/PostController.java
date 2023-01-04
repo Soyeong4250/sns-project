@@ -52,7 +52,7 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환")
     })
     @GetMapping()
-    public Response<Page<PostViewRes>> getPostList(@PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) throws SQLException {
+    public Response<Page<PostViewRes>> getPostList(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws SQLException {
         log.debug("getPostList() 실행");
         return Response.success(postService.getPostList(pageable));
     }
