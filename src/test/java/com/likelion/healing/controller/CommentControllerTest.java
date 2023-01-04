@@ -1,9 +1,9 @@
 package com.likelion.healing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.likelion.healing.domain.dto.CommentDeleteRes;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
-import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.CommentService;
@@ -233,7 +233,7 @@ class CommentControllerTest {
 
         @Test
         @DisplayName("댓글 수정 실패 - 작성자 불일치")
-        void update_mismatchedAuthorAndUser() throws Exception {
+        void mismatchedAuthorAndUser() throws Exception {
             CommentReq req = CommentReq.builder()
                     .comment("update")
                     .build();
@@ -254,10 +254,9 @@ class CommentControllerTest {
 
         @Test
         @DisplayName("댓글 수정 실패 - 데이터베이스 에러")
-        void update_notFoundDatabase() throws Exception {
-            PostReq req = PostReq.builder()
-                    .title("test title")
-                    .body("test body")
+        void notFoundedDatabase() throws Exception {
+            CommentReq req = CommentReq.builder()
+                    .comment("update")
                     .build();
 
             given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
@@ -275,5 +274,75 @@ class CommentControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("댓글 삭제 테스트")
+    class DeleteCommentTest {
+        @Test
+        @DisplayName("댓글 삭제 성공")
+        void successfulDeleteComment() throws Exception {
+            CommentDeleteRes commentDeleteRes = new CommentDeleteRes("댓글 삭제 성공", commentId);
 
+            given(commentService.deleteComment(any(Integer.class), any(Integer.class), any(String.class)))
+                    .willReturn(commentDeleteRes);
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(commentDeleteRes)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("댓글 삭제 성공"))
+                    .andExpect(jsonPath("$.result.id").value(1));
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("댓글 수정 실패 - 인증 실패")
+        void NotFoundedUser() throws Exception {
+            String userName = "test";
+
+            given(commentService.deleteComment(any(Integer.class), any(Integer.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다", userName)));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("댓글 삭제 실패 - 작성자 불일치")
+        void mismatchedAuthorAndUser() throws Exception {
+
+            given(commentService.deleteComment(any(Integer.class), any(Integer.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다"));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                    .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다"));
+
+        }
+
+        @Test
+        @DisplayName("댓글 삭제 실패 - 데이터베이스 에러")
+        void update_notFoundDatabase() throws Exception {
+
+            given(commentService.deleteComment(any(Integer.class), any(Integer.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d/comments/%d", postId, commentId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
+                    .andExpect(jsonPath("$.result.message").value("DB 에러"));
+
+        }
+    }
 }
