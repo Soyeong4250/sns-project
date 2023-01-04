@@ -1,7 +1,10 @@
 package com.likelion.healing.domain.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -12,9 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "post")
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @EqualsAndHashCode(callSuper = true)
 @Where(clause = "deleted_at IS NULL")
 @SQLDelete(sql = "UPDATE post SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -38,6 +39,14 @@ public class PostEntity extends BaseEntity{
     @JoinColumn(name = "user_id")
     @Schema(description = "작성자 정보")
     private UserEntity user;
+
+    @Builder
+    public PostEntity(Integer id, String title, String body, UserEntity user) {
+        this.id = id;
+        this.title = title;
+        this.body = body;
+        this.user = user;
+    }
 
     public void updatePost(String title, String body) {
         this.title = title;
