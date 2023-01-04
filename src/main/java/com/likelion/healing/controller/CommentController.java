@@ -1,5 +1,6 @@
 package com.likelion.healing.controller;
 
+import com.likelion.healing.domain.dto.CommentDeleteRes;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
 import com.likelion.healing.domain.entity.Response;
@@ -41,5 +42,11 @@ public class CommentController {
     public Response<CommentRes> updateComment(@PathVariable(name = "postId") Integer postId, @PathVariable(name = "id") Integer commentId, @Valid @RequestBody CommentReq commentReq, Authentication authentication) {
         log.debug("updateComment() 실행");
         return Response.success(commentService.updateComment(postId, commentId, commentReq, authentication.getName()));
+    }
+
+    @DeleteMapping("/{id}")
+    public Response<CommentDeleteRes> deleteComment(@PathVariable(name = "postId") Integer postId, @PathVariable(name = "id") Integer commentId, Authentication authentication) {
+        log.debug("deleteComment() 실행");
+        return Response.success(commentService.deleteComment(postId, commentId, authentication.getName()));
     }
 }
