@@ -1,5 +1,6 @@
 package com.likelion.healing.service;
 
+import com.likelion.healing.domain.dto.CommentDeleteRes;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
 import com.likelion.healing.domain.entity.CommentEntity;
@@ -75,5 +76,21 @@ public class CommentService {
         log.info("comment.newLastUpdate : {}", comment.getUpdatedAt());
 
         return CommentRes.of(comment);
+    }
+
+    @Transactional
+    public CommentDeleteRes deleteComment(Integer postId, Integer commentId, String userName) {
+        postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 포스트가 존재하지 않습니다.", postId)));
+
+        userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 존재하지 않는 회원입니다.", userName)));
+
+
+        CommentEntity comment = commentRepository.findByPostIdAndId(postId, commentId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.COMMENT_NOT_FOUND, String.format("%d번 포스트에는 %d번 댓글이 존재하지 않습니다.", postId, commentId)));
+
+        comment.deleteComment();
+        return new CommentDeleteRes("댓글 삭제 완료", commentId);
     }
 }
