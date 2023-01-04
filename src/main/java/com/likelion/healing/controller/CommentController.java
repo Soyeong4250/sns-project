@@ -36,4 +36,10 @@ public class CommentController {
         log.debug("getCommentList() 실행");
         return Response.success(commentService.getCommentList(postId, pageable));
     }
+
+    @PutMapping("{id}")
+    public Response<CommentRes> updateComment(@PathVariable(name = "postId") Integer postId, @PathVariable(name = "id") Integer commentId, @Valid @RequestBody CommentReq commentReq, Authentication authentication) {
+        log.debug("updateComment() 실행");
+        return Response.success(commentService.updateComment(postId, commentId, commentReq, authentication.getName()));
+    }
 }
