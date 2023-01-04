@@ -29,7 +29,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public CommentRes createComment(Integer postId, CommentReq commentReq, String userName) {
+    public CommentRes createComment(Integer postId, @Valid CommentReq commentReq, String userName) {
 
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 포스트가 존재하지 않습니다.", postId)));
@@ -53,12 +53,13 @@ public class CommentService {
         return commentList;
     }
 
+    @Transactional
     public CommentRes updateComment(Integer postId, Integer commentId, @Valid CommentReq commentReq, String userName) {
         postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 포스트가 존재하지 않습니다.", postId)));
 
-        CommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.COMMENT_NOT_FOUND, String.format("%d번 댓글이 존재하지 않습니다.", commentId)));
+        CommentEntity comment = commentRepository.findByPostIdAndId(postId, commentId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.COMMENT_NOT_FOUND, String.format("%d번 포스트에는 %d번 댓글이 존재하지 않습니다.", postId, commentId)));
 
         UserEntity user = userRepository.findByUserName(userName)
                                         .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 존재하지 않는 회원입니다.", userName)));
@@ -67,7 +68,11 @@ public class CommentService {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
-        comment.updateComment(commentReq.getComment());
+        comment.updateComment(commentReq.getComment(), user);
+        log.info("comment.getComment : {}", comment.getComment());
+        log.info("comment.oldLastUpdate : {}", comment.getUpdatedAt());
+        commentRepository.flush();
+        log.info("comment.newLastUpdate : {}", comment.getUpdatedAt());
 
         return CommentRes.of(comment);
     }
