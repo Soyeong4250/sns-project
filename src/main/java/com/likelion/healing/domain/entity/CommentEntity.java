@@ -1,14 +1,19 @@
 package com.likelion.healing.domain.entity;
 
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name ="comment")
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Where(clause = "deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE comment SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
 public class CommentEntity extends BaseEntity {
 
     @Id
@@ -39,5 +44,9 @@ public class CommentEntity extends BaseEntity {
     public void updateComment(String comment, UserEntity user) {
         this.comment = comment;
         this.user = user;
+    }
+
+    public void deleteComment() {
+        setDeletedAt(LocalDateTime.now());
     }
 }
