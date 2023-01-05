@@ -320,4 +320,66 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
                 .andExpect(jsonPath("$.result.message").value("DB에러"));
     }
+
+    @Test
+    @WithMockUser
+    @DisplayName("마이피드 조회 성공")
+    void successfulGetMyFeed() throws Exception {
+//        PageRequest pageRequest = PageRequest.of(1, 10, Sort.by("createdAt").descending());
+//
+//        List<PostViewRes> postList = new ArrayList<>();
+//        for (int i = 0; i < 10; i++) {
+//            LocalDateTime now = LocalDateTime.now().plusMinutes(i);
+//            postList.add(new PostViewRes(i, "title"+i, "body"+i, "user", now, now));
+//        }
+//
+//        int start = (int) pageRequest.getOffset();
+//        int end = Math.min((start + pageRequest.getPageSize()), postList.size());
+//
+//        Page<PostViewRes> postPage = new PageImpl<>(postList.subList(start, end), pageRequest, postList.size());
+//
+//        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(postPage);
+//
+//        mockMvc.perform(get("/api/v1/posts/my")
+//                        .param("page", "0")
+//                        .param("size", "10")
+//                        .param("sort", "createdAt,desc")
+//                        .param("userName", "user"))
+//                .andDo(print())
+//                .andExpect(status().isOk());
+//
+//        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+//        verify(postService).getPostList(pageableCaptor.capture());
+//        PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+//
+//        assertEquals(0, pageable.getPageNumber());
+//        assertEquals(10, pageable.getPageSize());
+//        assertEquals(Sort.by("createdAt", "desc"), pageable.withSort(Sort.by("createdAt", "desc")).getSort());
+
+        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "createdAt,desc")
+                        .param("userName", "user"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("마이피드 조회 실패 - 로그인 하지 않은 경우")
+    void NotLogin() throws Exception {
+        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "createdAt,desc")
+                        .param("userName", "user"))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
 }
