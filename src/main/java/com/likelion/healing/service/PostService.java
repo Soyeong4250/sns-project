@@ -105,4 +105,12 @@ public class PostService {
                 .message("포스트 삭제 완료")
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public Page<PostViewRes> getMyFeed(Pageable pageable, String userName) {
+        UserEntity user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+
+        return postRepository.findByUser(user, pageable).map(PostViewRes::of);
+    }
 }
