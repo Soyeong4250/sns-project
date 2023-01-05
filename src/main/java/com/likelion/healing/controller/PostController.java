@@ -101,7 +101,13 @@ public class PostController {
         PostRes postRes = postService.deletePostById(id, authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(postRes);
     }
-    
+
+    @ApiOperation(value = "마이피드 조회", notes = "Pageable을 이용한 마이피드 조회 성공유무 반환")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "마이피드 조회 성공"),
+            @ApiResponse(code = 401, message = "현재 로그인이 되어 있지 않은 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
+            @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
+    })
     @GetMapping("/my")
     public Response<Page<PostViewRes>> getMyFeed(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
