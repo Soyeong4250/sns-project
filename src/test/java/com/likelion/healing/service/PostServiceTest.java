@@ -42,7 +42,7 @@ class PostServiceTest {
         Mockito.when(postRepository.save(any(PostEntity.class)))
                 .thenReturn(mockPost);
 
-        Assertions.assertDoesNotThrow(() -> postService.addPost(new PostReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
+        Assertions.assertDoesNotThrow(() -> postService.createPost(new PostReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
     }
 
     @Test
@@ -59,7 +59,7 @@ class PostServiceTest {
                 .thenReturn(mockPost);
 
         try {
-            PostRes postRes = postService.addPost(
+            PostRes postRes = postService.createPost(
                     new PostReq("title1", "body1"), givenUser.getUsername());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
