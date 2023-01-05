@@ -59,15 +59,14 @@ class CommentControllerTest {
 
     @Nested
     @DisplayName("댓글 등록 테스트")
-    class AddCommentTest{
+    class CreateCommentTest{
+        private CommentReq req = CommentReq.builder()
+                                            .comment("comment")
+                                            .build();
 
         @Test
         @DisplayName("댓글 등록 성공")
-        void successfulAddComment() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("comment")
-                    .build();
-
+        void successCreateComment() throws Exception {
             LocalDateTime nowTime = LocalDateTime.now();
             CommentRes comment = CommentRes.builder()
                                                 .id(1)
@@ -100,10 +99,6 @@ class CommentControllerTest {
         @WithAnonymousUser
         @DisplayName("댓글 등록 실패 - 로그인 하지 않은 경우")
         void NotLogin() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("comment")
-                    .build();
-
             LocalDateTime nowTime = LocalDateTime.now();
             CommentRes comment = CommentRes.builder()
                                                 .id(1)
@@ -130,10 +125,6 @@ class CommentControllerTest {
         @Test
         @DisplayName("댓글 등록 실패 - 게시글이 존재하지 않는 경우")
         void NotFoundedPost() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("comment")
-                    .build();
-
             given(commentService.createComment(any(Integer.class), any(CommentReq.class), any(String.class)))
                     .willThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 게시글은 존재하지 않습니다.", postId)));
 
@@ -175,12 +166,12 @@ class CommentControllerTest {
     @Nested
     @DisplayName("댓글 수정 테스트")
     class UpdateCommentTest {
+        private CommentReq req = CommentReq.builder()
+                .comment("update")
+                .build();
         @Test
         @DisplayName("댓글 수정 성공")
-        void successfulUpdateComment() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("update")
-                    .build();
+        void successUpdateComment() throws Exception {
 
             LocalDateTime nowTime = LocalDateTime.now();
             CommentRes comment = CommentRes.builder()
@@ -214,9 +205,6 @@ class CommentControllerTest {
         @WithAnonymousUser
         @DisplayName("댓글 수정 실패 - 인증 실패")
         void NotFoundedUser() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("update")
-                    .build();
 
             String userName = "test";
 
@@ -234,9 +222,6 @@ class CommentControllerTest {
         @Test
         @DisplayName("댓글 수정 실패 - 작성자 불일치")
         void mismatchedAuthorAndUser() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("update")
-                    .build();
 
             given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
                     .willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다"));
@@ -255,9 +240,6 @@ class CommentControllerTest {
         @Test
         @DisplayName("댓글 수정 실패 - 데이터베이스 에러")
         void notFoundedDatabase() throws Exception {
-            CommentReq req = CommentReq.builder()
-                    .comment("update")
-                    .build();
 
             given(commentService.updateComment(any(Integer.class), any(Integer.class), any(CommentReq.class), any(String.class)))
                     .willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
@@ -279,7 +261,7 @@ class CommentControllerTest {
     class DeleteCommentTest {
         @Test
         @DisplayName("댓글 삭제 성공")
-        void successfulDeleteComment() throws Exception {
+        void successDeleteComment() throws Exception {
             CommentDeleteRes commentDeleteRes = new CommentDeleteRes("댓글 삭제 성공", commentId);
 
             given(commentService.deleteComment(any(Integer.class), any(Integer.class), any(String.class)))
@@ -330,7 +312,7 @@ class CommentControllerTest {
 
         @Test
         @DisplayName("댓글 삭제 실패 - 데이터베이스 에러")
-        void update_notFoundDatabase() throws Exception {
+        void notFoundDatabase() throws Exception {
 
             given(commentService.deleteComment(any(Integer.class), any(Integer.class), any(String.class)))
                     .willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
