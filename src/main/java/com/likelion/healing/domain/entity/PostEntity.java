@@ -9,7 +9,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -40,6 +41,9 @@ public class PostEntity extends BaseEntity{
     @Schema(description = "작성자 정보")
     private UserEntity user;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<CommentEntity> comments = new ArrayList<>();
+
     @Builder
     public PostEntity(Integer id, String title, String body, UserEntity user) {
         this.id = id;
@@ -51,9 +55,5 @@ public class PostEntity extends BaseEntity{
     public void updatePost(String title, String body) {
         this.title = title;
         this.body = body;
-    }
-
-    public void deletePost() {
-        setDeletedAt(LocalDateTime.now());
     }
 }
