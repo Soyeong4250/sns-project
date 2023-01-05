@@ -9,6 +9,7 @@ import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.PostService;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PostController.class)
+@WithMockUser
 class PostControllerTest {
 
     @Autowired
@@ -46,68 +48,71 @@ class PostControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 작성 성공")
-    void successfulAddPost() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("title1")
-                .body("body1")
-                .build();
+    @Nested
+    @DisplayName("포스트 작성 테스트")
+    class CreatePostTest{
 
-        given(postService.addPost(any(PostReq.class), "Bearer " + any(String.class))).willReturn(new PostRes("포스트 등록 완료", 1));
+        @Test
+        @DisplayName("포스트 작성 성공")
+        void successCreatePost() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("title1")
+                    .body("body1")
+                    .build();
 
-        mockMvc.perform(post("/api/v1/posts")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
-                .andExpect(jsonPath("$.result.postId").value(1));
+            given(postService.createPost(any(PostReq.class), "Bearer " + any(String.class))).willReturn(new PostRes("포스트 등록 완료", 1));
+
+            mockMvc.perform(post("/api/v1/posts")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
+                    .andExpect(jsonPath("$.result.postId").value(1));
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("포스트 작성 실패 - JWT를 Bearer Token으로 보내지 않은 경우")
+        void notStartsWithBearer() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("title1")
+                    .body("body1")
+                    .build();
+
+            given(postService.createPost(any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+            mockMvc.perform(post("/api/v1/posts")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("포스트 작성 실패 - JWT가 유효하지 않은 경우")
+        void expiredToken() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("title1")
+                    .body("body1")
+                    .build();
+
+            given(postService.createPost(any(PostReq.class), "Bearer " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+            mockMvc.perform(post("/api/v1/posts")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
     @Test
-    @WithAnonymousUser
-    @DisplayName("포스트 작성 실패 - JWT를 Bearer Token으로 보내지 않은 경우")
-    void notStartsWithBearer() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("title1")
-                .body("body1")
-                .build();
-
-        given(postService.addPost(any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
-
-        mockMvc.perform(post("/api/v1/posts")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithAnonymousUser
-    @DisplayName("포스트 작성 실패 - JWT가 유효하지 않은 경우")
-    void expiredToken() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("title1")
-                .body("body1")
-                .build();
-
-        given(postService.addPost(any(PostReq.class), "Bearer " + any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
-
-        mockMvc.perform(post("/api/v1/posts")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser
     @DisplayName("포스트 전체 목록 조회 - 생성일자 내림차순")
     void getPostList() throws Exception {
         List<PostViewRes> postList = new ArrayList<>();
@@ -131,9 +136,8 @@ class PostControllerTest {
     }
 
     @Test
-    @WithMockUser
     @DisplayName("포스트 단건 조회 성공")
-    void successfulGetPostById() throws Exception {
+    void successGetPostById() throws Exception {
         Integer postId = 1;
         PostViewRes post = PostViewRes.builder()
                 .id(1)
@@ -159,227 +163,236 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.lastModifiedAt").exists());
     }
 
-    @Test
-    @WithAnonymousUser
-    @DisplayName("포스트 수정 실패 - 인증 실패")
-    void update_authenticationFailed() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("test title")
-                .body("test body")
-                .build();
-        UserEntity user = UserEntity.builder()
-                .userName("Soyeong")
-                .password("12345")
-                .build();
-        Integer postId = 1;
+    @Nested
+    @DisplayName("포스트 수정 테스트")
+    class UpdatePostTest {
 
-        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+        @Test
+        @WithAnonymousUser
+        @DisplayName("포스트 수정 실패 - 인증 실패")
+        void authenticationFailed() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("test title")
+                    .body("test body")
+                    .build();
+            UserEntity user = UserEntity.builder()
+                    .userName("Soyeong")
+                    .password("12345")
+                    .build();
+            Integer postId = 1;
 
-        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("포스트 수정 실패 - 작성자 불일치")
+        void mismatchedAuthorAndUser() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("test title")
+                    .body("test body")
+                    .build();
+            Integer postId = 1;
+
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                    .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."));
+        }
+
+        @Test
+        @DisplayName("포스트 수정 실패 - 데이터베이스 에러")
+        void notFoundDatabase() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("test title")
+                    .body("test body")
+                    .build();
+            Integer postId = 1;
+
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
+                    .andExpect(jsonPath("$.result.message").value("DB에러"));
+        }
+
+        @Test
+        @DisplayName("포스트 수정 성공")
+        void successUpdatePost() throws Exception {
+            PostReq req = PostReq.builder()
+                    .title("test title")
+                    .body("test body")
+                    .build();
+            Integer postId = 1;
+
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 수정 완료", postId));
+
+            mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(req)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
+                    .andExpect(jsonPath("$.result.postId").value(postId));
+        }
     }
 
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 수정 실패 - 작성자 불일치")
-    void update_mismatchedAuthorAndUser() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("test title")
-                .body("test body")
-                .build();
-        Integer postId = 1;
 
-        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+    @Nested
+    @DisplayName("포스트 삭제 테스트")
+    class DeletePostTest {
 
-        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
-                .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."));
+        @Test
+        @DisplayName("포스트 삭제 성공")
+        void successDeletePost() throws Exception {
+            Integer postId = 1;
+
+            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 삭제 완료", postId));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
+                    .andExpect(jsonPath("$.result.postId").value(postId));
+        }
+
+        @Test
+        @WithAnonymousUser
+        @DisplayName("포스트 삭제 실패 - 인증 실패")
+        void authenticationFailed() throws Exception {
+            UserEntity user = UserEntity.builder()
+                    .userName("Soyeong")
+                    .password("12345")
+                    .build();
+            Integer postId = 1;
+
+            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("포스트 삭제 실패 - 작성자 불일치")
+        void mismatchedAuthorAndUser() throws Exception {
+            Integer postId = 1;
+
+            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                    .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."));
+        }
+
+        @Test
+        @DisplayName("포스트 삭제 실패 - 데이터베이스 에러")
+        void notFoundDatabase() throws Exception {
+            Integer postId = 1;
+
+            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+
+            mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
+                            .with(csrf()))
+                    .andDo(print())
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
+                    .andExpect(jsonPath("$.result.message").value("DB에러"));
+        }
     }
 
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 수정 실패 - 데이터베이스 에러")
-    void update_notFoundDatabase() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("test title")
-                .body("test body")
-                .build();
-        Integer postId = 1;
+    @Nested
+    @DisplayName("마이피드 조회 테스트")
+    class GetMyFeed {
 
-        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+        @Test
+        @DisplayName("마이피드 조회 성공")
+        void successGetMyFeed() throws Exception {
+    //        PageRequest pageRequest = PageRequest.of(1, 10, Sort.by("createdAt").descending());
+    //
+    //        List<PostViewRes> postList = new ArrayList<>();
+    //        for (int i = 0; i < 10; i++) {
+    //            LocalDateTime now = LocalDateTime.now().plusMinutes(i);
+    //            postList.add(new PostViewRes(i, "title"+i, "body"+i, "user", now, now));
+    //        }
+    //
+    //        int start = (int) pageRequest.getOffset();
+    //        int end = Math.min((start + pageRequest.getPageSize()), postList.size());
+    //
+    //        Page<PostViewRes> postPage = new PageImpl<>(postList.subList(start, end), pageRequest, postList.size());
+    //
+    //        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(postPage);
+    //
+    //        mockMvc.perform(get("/api/v1/posts/my")
+    //                        .param("page", "0")
+    //                        .param("size", "10")
+    //                        .param("sort", "createdAt,desc")
+    //                        .param("userName", "user"))
+    //                .andDo(print())
+    //                .andExpect(status().isOk());
+    //
+    //        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    //        verify(postService).getPostList(pageableCaptor.capture());
+    //        PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+    //
+    //        assertEquals(0, pageable.getPageNumber());
+    //        assertEquals(10, pageable.getPageSize());
+    //        assertEquals(Sort.by("createdAt", "desc"), pageable.withSort(Sort.by("createdAt", "desc")).getSort());
 
-        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
-                .andExpect(jsonPath("$.result.message").value("DB에러"));
-    }
+            given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
 
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 수정 성공")
-    void successfulEdit() throws Exception {
-        PostReq req = PostReq.builder()
-                .title("test title")
-                .body("test body")
-                .build();
-        Integer postId = 1;
+            mockMvc.perform(get("/api/v1/posts/my")
+                            .param("page", "0")
+                            .param("size", "10")
+                            .param("sort", "createdAt,desc")
+                            .param("userName", "user"))
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
 
-        given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 수정 완료", postId));
+        @Test
+        @WithAnonymousUser
+        @DisplayName("마이피드 조회 실패 - 로그인 하지 않은 경우")
+        void NotLogin() throws Exception {
+            given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
 
-        mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(req)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
-                .andExpect(jsonPath("$.result.postId").value(postId));
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 삭제 성공")
-    void successfulDelete() throws Exception {
-        Integer postId = 1;
-
-        given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 삭제 완료", postId));
-
-        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
-                .andExpect(jsonPath("$.result.postId").value(postId));
-    }
-
-    @Test
-    @WithAnonymousUser
-    @DisplayName("포스트 삭제 실패 - 인증 실패")
-    void delete_authenticationFailed() throws Exception {
-        UserEntity user = UserEntity.builder()
-                .userName("Soyeong")
-                .password("12345")
-                .build();
-        Integer postId = 1;
-
-        given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
-
-        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 삭제 실패 - 작성자 불일치")
-    void delete_mismatchedAuthorAndUser() throws Exception {
-        Integer postId = 1;
-
-        given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
-
-        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
-                .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."));
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("포스트 삭제 실패 - 데이터베이스 에러")
-    void delete_notFoundDatabase() throws Exception {
-        Integer postId = 1;
-
-        given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
-
-        mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
-                .andExpect(jsonPath("$.result.message").value("DB에러"));
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("마이피드 조회 성공")
-    void successfulGetMyFeed() throws Exception {
-//        PageRequest pageRequest = PageRequest.of(1, 10, Sort.by("createdAt").descending());
-//
-//        List<PostViewRes> postList = new ArrayList<>();
-//        for (int i = 0; i < 10; i++) {
-//            LocalDateTime now = LocalDateTime.now().plusMinutes(i);
-//            postList.add(new PostViewRes(i, "title"+i, "body"+i, "user", now, now));
-//        }
-//
-//        int start = (int) pageRequest.getOffset();
-//        int end = Math.min((start + pageRequest.getPageSize()), postList.size());
-//
-//        Page<PostViewRes> postPage = new PageImpl<>(postList.subList(start, end), pageRequest, postList.size());
-//
-//        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(postPage);
-//
-//        mockMvc.perform(get("/api/v1/posts/my")
-//                        .param("page", "0")
-//                        .param("size", "10")
-//                        .param("sort", "createdAt,desc")
-//                        .param("userName", "user"))
-//                .andDo(print())
-//                .andExpect(status().isOk());
-//
-//        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-//        verify(postService).getPostList(pageableCaptor.capture());
-//        PageRequest pageable = (PageRequest) pageableCaptor.getValue();
-//
-//        assertEquals(0, pageable.getPageNumber());
-//        assertEquals(10, pageable.getPageSize());
-//        assertEquals(Sort.by("createdAt", "desc"), pageable.withSort(Sort.by("createdAt", "desc")).getSort());
-
-        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
-
-        mockMvc.perform(get("/api/v1/posts/my")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .param("sort", "createdAt,desc")
-                        .param("userName", "user"))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithAnonymousUser
-    @DisplayName("마이피드 조회 실패 - 로그인 하지 않은 경우")
-    void NotLogin() throws Exception {
-        given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
-
-        mockMvc.perform(get("/api/v1/posts/my")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .param("sort", "createdAt,desc")
-                        .param("userName", "user"))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
+            mockMvc.perform(get("/api/v1/posts/my")
+                            .param("page", "0")
+                            .param("size", "10")
+                            .param("sort", "createdAt,desc")
+                            .param("userName", "user"))
+                    .andDo(print())
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
 }
