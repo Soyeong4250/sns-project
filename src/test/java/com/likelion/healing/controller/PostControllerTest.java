@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -109,24 +110,23 @@ class PostControllerTest {
     @WithMockUser
     @DisplayName("포스트 전체 목록 조회 - 생성일자 내림차순")
     void getPostList() throws Exception {
-
         List<PostViewRes> postList = new ArrayList<>();
-        List<LocalDateTime> timeList = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            LocalDateTime now = LocalDateTime.now();
-            timeList.add(now);
-            postList.add(new PostViewRes(i, "title"+(i+1), "body"+(i+1), "Soyeong", now, now));
+        for (int i = 0; i < 10; i++) {
+            LocalDateTime now = LocalDateTime.now().plusMinutes(i);
+            postList.add(new PostViewRes(i, "title"+i, "body"+i, "test", now, now));
         }
-        timeList.stream().sorted(LocalDateTime::compareTo);
-        for (LocalDateTime time:timeList) {
-            System.out.println(time);
-        }
-        Page<PostViewRes> pageRes = new PageImpl<>(postList);
-        given(postService.getPostList(any(Pageable.class))).willReturn(pageRes);
+        Page<PostViewRes> postViewResPage = new PageImpl<>(postList);
+        postViewResPage.stream().sorted(Comparator.comparing(PostViewRes::getCreatedAt).reversed());
 
-        mockMvc.perform(get("/api/v1/posts"))
+        given(postService.getPostList(any(Pageable.class))).willReturn(postViewResPage);
+
+        mockMvc.perform(get("/api/v1/posts")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "createdAt,desc"))
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"));
 
     }
 
