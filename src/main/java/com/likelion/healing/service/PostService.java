@@ -26,7 +26,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     @Transactional
-    public PostRes addPost(PostReq postReq, String userName) {
+    public PostRes createPost(PostReq postReq, String userName) {
         UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
