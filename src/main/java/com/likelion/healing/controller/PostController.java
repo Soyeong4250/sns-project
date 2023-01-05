@@ -37,12 +37,12 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환")
     })
     @PostMapping()
-    public Response<PostRes> addPost(@Valid @RequestBody PostReq postReq, Authentication authentication) throws SQLException  {
+    public Response<PostRes> createPost(@Valid @RequestBody PostReq postReq, Authentication authentication) throws SQLException  {
         log.info("title : {}, body : {}", postReq.getTitle(), postReq.getBody());
         String userName = authentication.getName();
         log.info("authentication : {}", authentication);
         log.info("userName : {}", userName);
-        PostRes postRes = postService.addPost(postReq, userName);
+        PostRes postRes = postService.createPost(postReq, userName);
         return Response.success(postRes);
     }
 
@@ -101,7 +101,7 @@ public class PostController {
         PostRes postRes = postService.deletePostById(id, authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(postRes);
     }
-
+    
     @GetMapping("/my")
     public Response<Page<PostViewRes>> getMyFeed(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
