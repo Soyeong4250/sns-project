@@ -101,4 +101,12 @@ public class PostController {
         PostRes postRes = postService.deletePostById(id, authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
         return Response.success(postRes);
     }
+
+    @GetMapping("/my")
+    public Response<Page<PostViewRes>> getMyFeed(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, Authentication authentication) throws SQLException {
+        log.info("userName : {}", authentication.getName());
+        Page<PostViewRes> postViewResPage = postService.getMyFeed(pageable, authentication.getName());
+        return Response.success(postViewResPage);
+    }
+
 }
