@@ -5,7 +5,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name ="comment")
@@ -41,12 +40,14 @@ public class CommentEntity extends BaseEntity {
         this.user = user;
     }
 
+    public void setPostAndComment(PostEntity post) {
+        this.post = post;
+        post.getComments().add(this);
+    }
+
     public void updateComment(String comment, UserEntity user) {
         this.comment = comment;
         this.user = user;
     }
 
-    public void deleteComment() {
-        setDeletedAt(LocalDateTime.now());
-    }
 }
