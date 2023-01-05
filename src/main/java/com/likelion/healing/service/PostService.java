@@ -98,7 +98,7 @@ public class PostService {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
-        post.deletePost();
+        postRepository.deleteById(postId);
 
         return PostRes.builder()
                 .postId(post.getId())
