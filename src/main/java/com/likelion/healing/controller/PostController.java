@@ -114,5 +114,12 @@ public class PostController {
         Page<PostViewRes> postViewResPage = postService.getMyFeed(pageable, authentication.getName());
         return Response.success(postViewResPage);
     }
+    @PostMapping("/{id}/likes")
+    public Response<String> increaseLike(@PathVariable Integer id, Authentication authentication) {
+        log.info("userName : {}", authentication.getName());
+        postService.increaseLike(id, authentication.getName());
+        return Response.success(null);
+    }
+
 
 }
