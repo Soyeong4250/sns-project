@@ -3,11 +3,13 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
+import com.likelion.healing.domain.entity.LikeEntity;
 import com.likelion.healing.domain.entity.PostEntity;
 import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
+import com.likelion.healing.repository.LikeRepository;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+
+    private final LikeRepository likeRepository;
 
     @Transactional
     public PostRes createPost(PostReq postReq, String userName) {
@@ -113,4 +117,21 @@ public class PostService {
 
         return postRepository.findByUser(user, pageable).map(PostViewRes::of);
     }
+
+    @Transactional
+    public void increaseLike(Integer postId, String userName) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        UserEntity user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+
+        likeRepository.findByPostAndUser(post, user)
+                .ifPresent(likeEntity -> {
+                    throw new HealingSnsAppException(ErrorCode.DUPLICATED_LIKE, "이미 좋아요를 눌렀습니다.");
+                });
+
+        likeRepository.save(LikeEntity.builder().post(post).user(user).build());
+    }
+
 }
