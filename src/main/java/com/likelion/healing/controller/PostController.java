@@ -118,7 +118,7 @@ public class PostController {
     public Response<String> increaseLike(@PathVariable Integer id, Authentication authentication) {
         log.info("userName : {}", authentication.getName());
         postService.increaseLike(id, authentication.getName());
-        return Response.success(null);
+        return Response.success("좋아요를 눌렀습니다.");
     }
 
 
