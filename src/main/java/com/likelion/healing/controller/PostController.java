@@ -114,15 +114,32 @@ public class PostController {
         Page<PostViewRes> postViewResPage = postService.getMyFeed(pageable, authentication.getName());
         return Response.success(postViewResPage);
     }
+
+    @ApiOperation(value = "좋아요 누르기", notes = "id, Token을 입력받아 좋아요 누르기 성공유무 반환")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "좋아요 누르기 성공"),
+            @ApiResponse(code = 401, message = "현재 로그인이 되어 있지 않은 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
+            @ApiResponse(code = 404, message = "포스트를 찾지 못하는 경우 👉 POST_NOT_FOUND, 에러 메세지 반환"),
+            @ApiResponse(code = 404, message = "현재 로그인한 회원을 찾지 못하는 경우 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
+            @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
+    })
     @PostMapping("/{id}/likes")
-    public Response<String> increaseLike(@PathVariable Integer id, Authentication authentication) {
+    public Response<String> increaseLike(@PathVariable Integer id, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
         postService.increaseLike(id, authentication.getName());
         return Response.success("좋아요를 눌렀습니다.");
     }
 
+    @ApiOperation(value = "좋아요 취소", notes = "id, Token을 입력받아 좋아요 취소 성공유무 반환")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "좋아요 취소 성공"),
+            @ApiResponse(code = 401, message = "현재 로그인이 되어 있지 않은 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
+            @ApiResponse(code = 404, message = "포스트를 찾지 못하는 경우 👉 POST_NOT_FOUND, 에러 메세지 반환"),
+            @ApiResponse(code = 404, message = "현재 로그인한 회원을 찾지 못하는 경우 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
+            @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
+    })
     @DeleteMapping("/{id}/likes")
-    public Response<String> decreaseLike(@PathVariable Integer id, Authentication authentication) {
+    public Response<String> decreaseLike(@PathVariable Integer id, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
         postService.decreaseLike(id, authentication.getName());
         return Response.success("좋아요를 취소했습니다.");
