@@ -10,6 +10,7 @@ import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.fixture.PostEntityFixture;
 import com.likelion.healing.fixture.TestInfoFixture;
 import com.likelion.healing.fixture.UserEntityFixture;
+import com.likelion.healing.repository.LikeRepository;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -26,7 +27,8 @@ class PostServiceTest {
 
     private PostRepository postRepository = mock(PostRepository.class);
     private UserRepository userRepository = mock(UserRepository.class);
-    private PostService postService = new PostService(postRepository, userRepository);
+    private LikeRepository likeRepository = mock(LikeRepository.class);
+    private PostService postService = new PostService(postRepository, userRepository, likeRepository);
 
     @Test
     @DisplayName("포스트 등록 성공")
@@ -104,7 +106,7 @@ class PostServiceTest {
                 .thenReturn(Optional.empty());
 
         try {
-            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName(), fixture.getRole().name());
+            postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
         }
@@ -124,7 +126,7 @@ class PostServiceTest {
                 .thenReturn(Optional.of(givenPost));
 
         try {
-            PostRes postRes = postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername(), givenUser2.getRole().name());
+            postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
         }
@@ -148,7 +150,7 @@ class PostServiceTest {
         PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
         Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
         try {
-            PostRes postRes = postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName(), fixture.getRole().name());
+            postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
         }
@@ -171,7 +173,7 @@ class PostServiceTest {
         PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
         Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
         try {
-            PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName(), fixture.getRole().name());
+            postService.deletePostById(fixture.getPostId(), fixture.getUserName());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
         }
@@ -188,7 +190,7 @@ class PostServiceTest {
                 .thenReturn(Optional.empty());
 
         try {
-            PostRes postRes = postService.deletePostById(fixture.getPostId(), fixture.getUserName(), fixture.getRole().name());
+            postService.deletePostById(fixture.getPostId(), fixture.getUserName());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
         }
@@ -208,7 +210,7 @@ class PostServiceTest {
                 .thenReturn(Optional.of(givenPost));
 
         try {
-            PostRes postRes = postService.deletePostById(givenPost.getId(), givenUser2.getUsername(), givenUser2.getRole().name());
+            postService.deletePostById(givenPost.getId(), givenUser2.getUsername());
         } catch (HealingSnsAppException e) {
             Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
         }
