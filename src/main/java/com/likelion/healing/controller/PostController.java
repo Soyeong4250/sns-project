@@ -145,4 +145,10 @@ public class PostController {
         return Response.success("좋아요를 취소했습니다.");
     }
 
+    @GetMapping("/{id}/likes")
+    public Response<Integer> countLike(@PathVariable Integer id) throws SQLException {
+        log.info("postId : {}", id);
+        Integer likeCnt = postService.countLike(id);
+        return Response.success(likeCnt);
+    }
 }
