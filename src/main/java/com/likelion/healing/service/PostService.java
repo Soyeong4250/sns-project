@@ -70,7 +70,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName, String userRole) {
+    public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
@@ -78,7 +78,7 @@ public class PostService {
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 //        System.out.println("확인 = " + authentication.getAuthorities().iterator().next().getAuthority().equals(UserRole.ADMIN.getAuthority()));
 
-        if(!userRole.equals(UserRole.ADMIN.getAuthority()) && !post.getUser().getUsername().equals(user.getUsername())) {
+        if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
@@ -91,14 +91,14 @@ public class PostService {
     }
 
     @Transactional
-    public PostRes deletePostById(Integer postId, String userName, String userRole) {
+    public PostRes deletePostById(Integer postId, String userName) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
-        if(!userRole.equals(UserRole.ADMIN.getAuthority()) && !post.getUser().getUsername().equals(user.getUsername())) {
+        if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
