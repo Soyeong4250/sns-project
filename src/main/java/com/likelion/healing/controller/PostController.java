@@ -121,5 +121,11 @@ public class PostController {
         return Response.success("좋아요를 눌렀습니다.");
     }
 
+    @DeleteMapping("/{id}/likes")
+    public Response<String> decreaseLike(@PathVariable Integer id, Authentication authentication) {
+        log.info("userName : {}", authentication.getName());
+        postService.decreaseLike(id, authentication.getName());
+        return Response.success("좋아요를 취소했습니다.");
+    }
 
 }
