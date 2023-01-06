@@ -184,7 +184,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
 
             mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -203,7 +203,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
             mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -225,7 +225,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
 
             mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -247,7 +247,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 수정 완료", postId));
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willReturn(new PostRes("포스트 수정 완료", postId));
 
             mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -271,7 +271,7 @@ class PostControllerTest {
         void successDeletePost() throws Exception {
             Integer postId = 1;
 
-            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 삭제 완료", postId));
+            given(postService.deletePostById(any(Integer.class), any(String.class))).willReturn(new PostRes("포스트 삭제 완료", postId));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -293,7 +293,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -307,7 +307,7 @@ class PostControllerTest {
         void mismatchedAuthorAndUser() throws Exception {
             Integer postId = 1;
 
-            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -324,7 +324,7 @@ class PostControllerTest {
         void notFoundDatabase() throws Exception {
             Integer postId = 1;
 
-            given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                             .with(csrf()))
