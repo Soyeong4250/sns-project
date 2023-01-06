@@ -7,6 +7,7 @@ import com.likelion.healing.domain.dto.PostViewRes;
 import com.likelion.healing.domain.entity.UserEntity;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
+import com.likelion.healing.fixture.TestInfoFixture;
 import com.likelion.healing.service.PostService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -151,7 +153,8 @@ class PostControllerTest {
         given(postService.getPostById(any(Integer.class))).willReturn(post);
 
         mockMvc.perform(get(String.format("/api/v1/posts/%d", postId))
-                        .with(csrf()))
+                        .with(csrf())
+                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -271,7 +274,8 @@ class PostControllerTest {
             given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willReturn(new PostRes("포스트 삭제 완료", postId));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                            .with(csrf()))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -292,7 +296,8 @@ class PostControllerTest {
             given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                            .with(csrf()))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isUnauthorized());
         }
@@ -305,7 +310,8 @@ class PostControllerTest {
             given(postService.deletePostById(any(Integer.class), any(String.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
-                            .with(csrf()))
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.resultCode").value("ERROR"))
@@ -392,6 +398,26 @@ class PostControllerTest {
                             .param("userName", "user"))
                     .andDo(print())
                     .andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Nested
+    @DisplayName("좋아요 테스트")
+    class LikeTest {
+
+        @Test
+        @DisplayName("좋아요 누르기 테스트")
+        void increaseLike() throws Exception {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+            doNothing().when(postService).increaseLike(fixture.getPostId(), fixture.getUserName());
+
+            mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
+                   .with(csrf())
+                   .contentType(MediaType.APPLICATION_JSON))
+                   .andDo(print())
+                   .andExpect(status().isOk())
+                   .andExpect(jsonPath("$.result").value("좋아요를 눌렀습니다."));
         }
     }
 
