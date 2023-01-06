@@ -6,6 +6,7 @@ import com.likelion.healing.domain.dto.CommentRes;
 import com.likelion.healing.domain.entity.CommentEntity;
 import com.likelion.healing.domain.entity.PostEntity;
 import com.likelion.healing.domain.entity.UserEntity;
+import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.CommentRepository;
@@ -83,13 +84,16 @@ public class CommentService {
         postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, String.format("%d번 포스트가 존재하지 않습니다.", postId)));
 
-        userRepository.findByUserName(userName)
+        UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 존재하지 않는 회원입니다.", userName)));
 
 
         CommentEntity comment = commentRepository.findByPostIdAndId(postId, commentId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.COMMENT_NOT_FOUND, String.format("%d번 포스트에는 %d번 댓글이 존재하지 않습니다.", postId, commentId)));
 
+        if(!user.getRole().equals(UserRole.ADMIN.getAuthority()) && !user.getUsername().equals(comment.getUser().getUsername())) {
+            throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+        }
         commentRepository.deleteById(commentId);
         return new CommentDeleteRes("댓글 삭제 완료", commentId);
     }
