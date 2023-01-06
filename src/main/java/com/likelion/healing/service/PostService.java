@@ -134,4 +134,17 @@ public class PostService {
         likeRepository.save(LikeEntity.builder().post(post).user(user).build());
     }
 
+    @Transactional
+    public void decreaseLike(Integer postId, String userName) {
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        UserEntity user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+
+        LikeEntity like = likeRepository.findByPostAndUser(post, user)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.LIKE_NOT_FOUND, "좋아요를 누른 적이 없습니다."));
+
+        likeRepository.delete(like);
+    }
 }
