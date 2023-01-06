@@ -547,4 +547,20 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.message").value(String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
         }
     }
+
+    @Test
+    @DisplayName("좋아요 개수 세기")
+    void countLikesTest() throws Exception {
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+        given(postService.countLike(any(Integer.class))).willReturn(5);
+
+        mockMvc.perform(get(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result").value(5));
+    }
 }
