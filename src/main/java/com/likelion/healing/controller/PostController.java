@@ -145,6 +145,12 @@ public class PostController {
         return Response.success("좋아요를 취소했습니다.");
     }
 
+    @ApiOperation(value = "좋아요 개수 구하기", notes = "id를 입력받아 해당 포스트의 좋아요 개수 반환")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "좋아요 개수 세기 성공"),
+            @ApiResponse(code = 404, message = "포스트를 찾지 못하는 경우 👉 POST_NOT_FOUND, 에러 메세지 반환"),
+            @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
+    })
     @GetMapping("/{id}/likes")
     public Response<Integer> countLike(@PathVariable Integer id) throws SQLException {
         log.info("postId : {}", id);
