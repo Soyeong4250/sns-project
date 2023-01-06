@@ -10,6 +10,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -43,6 +44,10 @@ public class PostEntity extends BaseEntity{
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<CommentEntity> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post")
+    private HashSet<LikeEntity> likes = new HashSet<>();
+
 
     @Builder
     public PostEntity(Integer id, String title, String body, UserEntity user) {
