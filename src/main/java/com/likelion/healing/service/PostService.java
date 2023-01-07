@@ -148,6 +148,7 @@ public class PostService {
         likeRepository.delete(like);
     }
 
+    @Transactional
     public Integer countLike(Integer postId) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
