@@ -3,12 +3,10 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.LikeEntity;
-import com.likelion.healing.domain.entity.PostEntity;
-import com.likelion.healing.domain.entity.UserEntity;
-import com.likelion.healing.domain.entity.UserRole;
+import com.likelion.healing.domain.entity.*;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
+import com.likelion.healing.repository.AlarmRepository;
 import com.likelion.healing.repository.LikeRepository;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
@@ -28,6 +26,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     private final LikeRepository likeRepository;
+    private final AlarmRepository alarmRepository;
 
     @Transactional
     public PostRes createPost(PostReq postReq, String userName) {
@@ -130,6 +129,14 @@ public class PostService {
                 .ifPresent(likeEntity -> {
                     throw new HealingSnsAppException(ErrorCode.DUPLICATED_LIKE, "이미 좋아요를 눌렀습니다.");
                 });
+
+        AlarmEntity alarm = AlarmEntity.builder()
+                .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                .fromUserId(user.getId())
+                .targetId(post.getId())
+                .user(post.getUser())
+                .build();
+        alarmRepository.save(alarm);
 
         likeRepository.save(LikeEntity.builder().post(post).user(user).build());
     }
