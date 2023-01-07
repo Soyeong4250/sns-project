@@ -3,13 +3,9 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.CommentDeleteRes;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
-import com.likelion.healing.domain.entity.CommentEntity;
-import com.likelion.healing.domain.entity.PostEntity;
-import com.likelion.healing.domain.entity.UserEntity;
-import com.likelion.healing.domain.entity.UserRole;
+import com.likelion.healing.domain.entity.*;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
-import com.likelion.healing.repository.AlarmRepository;
 import com.likelion.healing.repository.CommentRepository;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
@@ -30,8 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final AlarmRepository alarmRepository;
-    private AlarmService alarmService;
+    private final AlarmService alarmService;
 
     @Transactional
     public CommentRes createComment(Integer postId, @Valid CommentReq commentReq, String userName) {
@@ -43,10 +38,12 @@ public class CommentService {
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 존재하지 않는 회원입니다", userName)));
         CommentEntity commentEntity = commentReq.toEntity();
         commentEntity.setUser(user);
-        commentEntity.setPostAndComment(post);
+        commentEntity.setPost(post);
         commentRepository.save(commentEntity);
 
-        alarmService.sendAlarm(user, post);
+        log.info("userName : {}", user.getUsername());
+        log.info("postId : {}", post.getId());
+        alarmService.sendAlarm(user, post, AlarmType.NEW_COMMENT_ON_POST);
 
         return CommentRes.of(commentEntity);
     }
