@@ -5,6 +5,7 @@ import com.likelion.healing.domain.dto.*;
 import com.likelion.healing.domain.entity.AlarmType;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
+import com.likelion.healing.service.AlarmService;
 import com.likelion.healing.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -42,6 +43,9 @@ class UserControllerTest {
 
     @MockBean
     UserService userService;
+
+    @MockBean
+    AlarmService alarmService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -197,7 +201,7 @@ class UserControllerTest {
         // JPA Repository의 PagingAndSortingRepository에서 Paging과 Sorting이 된 상태로 return
         alarmList = alarmList.stream().sorted(Comparator.comparing(AlarmRes::getCreatedAt).reversed()).collect(Collectors.toList());
 
-        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(new PageImpl<>(alarmList));
+        given(alarmService.getAlarms(any(String.class), any(Pageable.class))).willReturn(new PageImpl<>(alarmList));
 
         mockMvc.perform(get("/api/v1/users/alarms")
                         .param("page", "0")
@@ -229,7 +233,7 @@ class UserControllerTest {
         // JPA Repository의 PagingAndSortingRepository에서 Paging과 Sorting이 된 상태로 return
         alarmList = alarmList.stream().sorted(Comparator.comparing(AlarmRes::getCreatedAt).reversed()).collect(Collectors.toList());
 
-        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(new PageImpl<>(alarmList));
+        given(alarmService.getAlarms(any(String.class), any(Pageable.class))).willReturn(new PageImpl<>(alarmList));
 
         mockMvc.perform(get("/api/v1/users/alarms")
                         .with(csrf())
