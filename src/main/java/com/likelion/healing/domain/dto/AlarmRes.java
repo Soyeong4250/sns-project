@@ -1,5 +1,6 @@
 package com.likelion.healing.domain.dto;
 
+import com.likelion.healing.domain.entity.AlarmEntity;
 import com.likelion.healing.domain.entity.AlarmType;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,5 +27,15 @@ public class AlarmRes {
         this.targetId = targetId;
         this.text = alarmType.label();
         this.createdAt = createdAt;
+    }
+
+    public static AlarmRes of(AlarmEntity alarm) {
+        return AlarmRes.builder()
+                .id(alarm.getId())
+                .alarmType(alarm.getAlarmType())
+                .fromUserId(alarm.getFromUserId())
+                .targetId(alarm.getTargetId())
+                .createdAt(alarm.getCreatedAt())
+                .build();
     }
 }
