@@ -10,6 +10,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +61,15 @@ public class UserController {
     @PostMapping("/{userId}/role/change")
     public Response<UserRoleUpdateRes> updateRole(@PathVariable Integer userId, @RequestBody UserRoleUpdateReq role, Authentication authentication) {
         log.info("authentication.getAuthorities : {}", authentication.getAuthorities());
-        UserRoleUpdateRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication.getName(), authentication.getAuthorities().iterator().next().getAuthority());
+        UserRoleUpdateRes updateUserRoleRes = userService.changeRole(userId, role.getRole(), authentication.getName());
         return Response.success(updateUserRoleRes);
+    }
+
+    @GetMapping("/alarms")
+    public Response<AlarmRes> getAlarms(Authentication authentication,
+                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+        log.debug("getAlarms() 실행");
+        AlarmRes alarmRes = userService.getAlarms(authentication.getName(), pageable);
+        return Response.success(alarmRes);
     }
 }
