@@ -69,18 +69,17 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UserRoleUpdateRes changeRole(Integer userId, UserRole changeRole, String userName, String role) {
-        log.info("authentication : {}", role);
-        if (!role.equals(UserRole.ADMIN.getAuthority())) {
-            System.out.println("pass");
+    public UserRoleUpdateRes changeRole(Integer changeUserId, UserRole changeRole, String loginUserName) {
+
+        UserEntity loginUser = userRepository.findByUserName(loginUserName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", loginUserName)));
+
+        if (!loginUser.getRole().equals(UserRole.ADMIN)) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
-        userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
-
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.")));
+        UserEntity user = userRepository.findById(changeUserId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%d번 회원은(는) 없는 회원입니다.", changeUserId)));
 
         user.changeRole(changeRole);
         return UserRoleUpdateRes.builder()
