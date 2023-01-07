@@ -11,8 +11,6 @@ import com.likelion.healing.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -91,12 +89,5 @@ public class UserService implements UserDetailsService {
                                 .role(changeRole)
                                 .build();
     }
-
-    public Page<AlarmRes> getAlarms(String userName, Pageable pageable) {
-
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
-
-        return alarmRepository.findByUser(user, pageable).map(AlarmRes::of);
-    }
+    
 }
