@@ -10,17 +10,21 @@ import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.AlarmRepository;
 import com.likelion.healing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AlarmService {
 
     private final UserRepository userRepository;
     private final AlarmRepository alarmRepository;
 
+    @Transactional(readOnly = true)
     public Page<AlarmRes> getAlarms(String userName, Pageable pageable) {
 
         UserEntity user = userRepository.findByUserName(userName)
@@ -29,10 +33,13 @@ public class AlarmService {
         return alarmRepository.findByUser(user, pageable).map(AlarmRes::of);
     }
 
-    public void sendAlarm(UserEntity user, PostEntity post) {
-        if(!user.equals(post.getUser())) {
+    @Transactional
+    public void sendAlarm(UserEntity user, PostEntity post, AlarmType alarmType) {
+        log.info("userName : {}", user.getUsername());
+        log.info("postId : {}", post.getId());
+        if(!user.getUsername().equals(post.getUser().getUsername())) {
             AlarmEntity alarm = AlarmEntity.builder()
-                    .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                    .alarmType(alarmType)
                     .fromUserId(user.getId())
                     .targetId(post.getId())
                     .user(post.getUser())
