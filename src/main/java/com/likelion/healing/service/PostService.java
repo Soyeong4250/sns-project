@@ -3,10 +3,7 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.LikeEntity;
-import com.likelion.healing.domain.entity.PostEntity;
-import com.likelion.healing.domain.entity.UserEntity;
-import com.likelion.healing.domain.entity.UserRole;
+import com.likelion.healing.domain.entity.*;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.LikeRepository;
@@ -28,7 +25,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     private final LikeRepository likeRepository;
-    private AlarmService alarmService;
+    private final AlarmService alarmService;
 
     @Transactional
     public PostRes createPost(PostReq postReq, String userName) {
@@ -59,7 +56,7 @@ public class PostService {
     public PostViewRes getPostById(Integer postId) {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
-
+        log.info("post.getComments.size : {}", post.getComments().size());
         return PostViewRes.builder()
                         .id(post.getId())
                         .title(post.getTitle())
@@ -134,7 +131,7 @@ public class PostService {
 
         likeRepository.save(LikeEntity.builder().post(post).user(user).build());
 
-        alarmService.sendAlarm(user, post);
+        alarmService.sendAlarm(user, post, AlarmType.NEW_LIKE_ON_POST);
     }
 
     @Transactional
