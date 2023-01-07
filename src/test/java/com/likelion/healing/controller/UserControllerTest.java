@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -19,6 +20,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -183,42 +188,48 @@ class UserControllerTest {
     @WithMockUser
     @DisplayName("알람 목록 조회 성공")
     void getAlarmsTest() throws Exception {
-        AlarmRes res = AlarmRes.builder()
-                                .id(1)
-                                .alarmType(AlarmType.NEW_LIKE_ON_POST)
-                                .fromUserId(1)
-                                .targetId(1)
-                                .createdAt(LocalDateTime.now())
-                                .build();
+        List<AlarmRes> alarmList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            LocalDateTime now = LocalDateTime.now().plusMinutes((int)(Math.random()*10));
+            alarmList.add(new AlarmRes(i, AlarmType.NEW_LIKE_ON_POST, 1, 1, now));
+        }
 
-        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(res);
+        // JPA Repository의 PagingAndSortingRepository에서 Paging과 Sorting이 된 상태로 return
+        alarmList = alarmList.stream().sorted(Comparator.comparing(AlarmRes::getCreatedAt).reversed()).collect(Collectors.toList());
+
+        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(new PageImpl<>(alarmList));
 
         mockMvc.perform(get("/api/v1/users/alarms")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "createdAt,desc")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.alarmType").value("NEW_LIKE_ON_POST"))
-                .andExpect(jsonPath("$.result.fromUserId").value(1))
-                .andExpect(jsonPath("$.result.targetId").value(1))
-                .andExpect(jsonPath("$.result.text").value("new like!"))
-                .andExpect(jsonPath("$.result.createdAt").exists());
+                .andExpect(jsonPath("$.result.content.length()").value(10))
+                .andExpect(jsonPath("$.result.content[0].alarmType").value("NEW_LIKE_ON_POST"))
+                .andExpect(jsonPath("$.result.content[0].fromUserId").value(1))
+                .andExpect(jsonPath("$.result.content[0].targetId").value(1))
+                .andExpect(jsonPath("$.result.content[0].text").value("new like!"))
+                .andExpect(jsonPath("$.result.content[0].createdAt").exists());
     }
 
     @Test
     @WithAnonymousUser
     @DisplayName("알람 목록 조회 실패 - 로그인하지 않은 경우")
     void notLogin() throws Exception {
-        AlarmRes res = AlarmRes.builder()
-                .id(1)
-                .alarmType(AlarmType.NEW_LIKE_ON_POST)
-                .fromUserId(1)
-                .targetId(1)
-                .createdAt(LocalDateTime.now())
-                .build();
+        List<AlarmRes> alarmList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            LocalDateTime now = LocalDateTime.now().plusMinutes((int)(Math.random()*10));
+            alarmList.add(new AlarmRes(i, AlarmType.NEW_LIKE_ON_POST, 1, 1, now));
+        }
+        
+        // JPA Repository의 PagingAndSortingRepository에서 Paging과 Sorting이 된 상태로 return
+        alarmList = alarmList.stream().sorted(Comparator.comparing(AlarmRes::getCreatedAt).reversed()).collect(Collectors.toList());
 
-        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(res);
+        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(new PageImpl<>(alarmList));
 
         mockMvc.perform(get("/api/v1/users/alarms")
                         .with(csrf())
