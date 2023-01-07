@@ -19,7 +19,7 @@ public class CommentEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column
+    @Column(nullable = false)
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,11 +38,6 @@ public class CommentEntity extends BaseEntity {
         this.comment = comment;
         this.post = post;
         this.user = user;
-    }
-
-    public void setPostAndComment(PostEntity post) {
-        this.post = post;
-        post.getComments().add(this);
     }
 
     public void updateComment(String comment, UserEntity user) {
