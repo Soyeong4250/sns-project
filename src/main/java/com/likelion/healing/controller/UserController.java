@@ -46,7 +46,7 @@ public class UserController {
     @ApiOperation(value = "로그인", notes = "userName과 password를 입력받아 로그인 성공유무를 반환")
     @ApiResponses({
             @ApiResponse(code = 200, message = "로그인 성공"),
-            @ApiResponse(code = 404, message = "일치하는 회원 이름 없음 👉 NOT_FOUND, 에러 메세지 반환"),
+            @ApiResponse(code = 404, message = "일치하는 회원 이름 없음 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
             @ApiResponse(code = 401, message = "비밀번호 일치하지 않음 👉 INVALID_PASSWORD, 에러 메세지 반환")
     })
     @PostMapping("/login")
@@ -68,6 +68,11 @@ public class UserController {
         return Response.success(updateUserRoleRes);
     }
 
+    @ApiOperation(value = "알람 조회", notes = "JWT와 페이징 조건(옵션)을 입력받아 알람 조회 성공유무를 반환")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "알람 조회 성공"),
+            @ApiResponse(code = 404, message = "일치하는 회원 이름 없음 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
+    })
     @GetMapping("/alarms")
     public Response<Page<AlarmRes>> getAlarms(Authentication authentication,
                                               @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
