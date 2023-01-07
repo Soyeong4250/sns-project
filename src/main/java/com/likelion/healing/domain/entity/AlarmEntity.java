@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "alarm")
 @NoArgsConstructor
 @Getter
 public class AlarmEntity extends BaseEntity {
