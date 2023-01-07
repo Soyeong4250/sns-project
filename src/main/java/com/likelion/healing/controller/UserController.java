@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -66,10 +67,9 @@ public class UserController {
     }
 
     @GetMapping("/alarms")
-    public Response<AlarmRes> getAlarms(Authentication authentication,
-                                        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+    public Response<Page<AlarmRes>> getAlarms(Authentication authentication,
+                                              @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
         log.debug("getAlarms() 실행");
-        AlarmRes alarmRes = userService.getAlarms(authentication.getName(), pageable);
-        return Response.success(alarmRes);
+        return Response.success( userService.getAlarms(authentication.getName(), pageable));
     }
 }
