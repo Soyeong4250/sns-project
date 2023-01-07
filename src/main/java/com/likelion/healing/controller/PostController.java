@@ -64,9 +64,9 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환")
     })
     @GetMapping("/{id}")
-    public Response<PostViewRes> getPostById(@PathVariable Integer id) throws SQLException {
-        log.info("postId : {}", id);
-        PostViewRes postRes = postService.getPostById(id);
+    public Response<PostViewRes> getPostById(@PathVariable(name = "id") Integer postId) throws SQLException {
+        log.info("postId : {}", postId);
+        PostViewRes postRes = postService.getPostById(postId);
         return Response.success(postRes);
     }
 
@@ -79,11 +79,11 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @PutMapping("/{id}")
-    public Response<PostRes> updatePostById(@PathVariable Integer id, @Valid @RequestBody PostReq postEditReq, Authentication authentication) throws SQLException {
-        log.info("postId : {}", id);
+    public Response<PostRes> updatePostById(@PathVariable(name = "id") Integer postId, @Valid @RequestBody PostReq postEditReq, Authentication authentication) throws SQLException {
+        log.info("postId : {}", postId);
         log.info("post title : {}", postEditReq.getTitle());
         log.info("post body : {}", postEditReq.getBody());
-        PostRes postRes = postService.updatePostById(id, postEditReq, authentication.getName());
+        PostRes postRes = postService.updatePostById(postId, postEditReq, authentication.getName());
         return Response.success(postRes);
     }
 
@@ -96,9 +96,9 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @DeleteMapping("/{id}")
-    public Response<PostRes> deletePostById(@PathVariable Integer id, Authentication authentication) throws SQLException {
-        log.info("postId : {}", id);
-        PostRes postRes = postService.deletePostById(id, authentication.getName());
+    public Response<PostRes> deletePostById(@PathVariable(name = "id") Integer postId, Authentication authentication) throws SQLException {
+        log.info("postId : {}", postId);
+        PostRes postRes = postService.deletePostById(postId, authentication.getName());
         return Response.success(postRes);
     }
 
@@ -124,9 +124,9 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @PostMapping("/{id}/likes")
-    public Response<String> increaseLike(@PathVariable Integer id, Authentication authentication) throws SQLException {
+    public Response<String> increaseLike(@PathVariable(name = "id") Integer postId, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
-        postService.increaseLike(id, authentication.getName());
+        postService.increaseLike(postId, authentication.getName());
         return Response.success("좋아요를 눌렀습니다.");
     }
 
@@ -139,9 +139,9 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @DeleteMapping("/{id}/likes")
-    public Response<String> decreaseLike(@PathVariable Integer id, Authentication authentication) throws SQLException {
+    public Response<String> decreaseLike(@PathVariable(name = "id") Integer postId, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
-        postService.decreaseLike(id, authentication.getName());
+        postService.decreaseLike(postId, authentication.getName());
         return Response.success("좋아요를 취소했습니다.");
     }
 
@@ -152,9 +152,9 @@ public class PostController {
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @GetMapping("/{id}/likes")
-    public Response<Integer> countLike(@PathVariable Integer id) throws SQLException {
-        log.info("postId : {}", id);
-        Integer likeCnt = postService.countLike(id);
+    public Response<Integer> countLike(@PathVariable(name = "id") Integer postId) throws SQLException {
+        log.info("postId : {}", postId);
+        Integer likeCnt = postService.countLike(postId);
         return Response.success(likeCnt);
     }
 }
