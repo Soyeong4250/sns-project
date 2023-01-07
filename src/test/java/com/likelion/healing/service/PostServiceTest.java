@@ -10,7 +10,6 @@ import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.fixture.PostEntityFixture;
 import com.likelion.healing.fixture.TestInfoFixture;
 import com.likelion.healing.fixture.UserEntityFixture;
-import com.likelion.healing.repository.AlarmRepository;
 import com.likelion.healing.repository.LikeRepository;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
@@ -29,8 +28,8 @@ class PostServiceTest {
     private PostRepository postRepository = mock(PostRepository.class);
     private UserRepository userRepository = mock(UserRepository.class);
     private LikeRepository likeRepository = mock(LikeRepository.class);
-    private AlarmRepository alarmRepository = mock(AlarmRepository.class);
-    private PostService postService = new PostService(postRepository, userRepository, likeRepository, alarmRepository);
+    private AlarmService alarmService = mock(AlarmService.class);
+    private PostService postService = new PostService(postRepository, userRepository, likeRepository, alarmService);
 
     @Test
     @DisplayName("포스트 등록 성공")
