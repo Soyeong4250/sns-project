@@ -3,6 +3,7 @@ package com.likelion.healing.controller;
 import com.likelion.healing.domain.dto.*;
 import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.domain.entity.UserRole;
+import com.likelion.healing.service.AlarmService;
 import com.likelion.healing.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final AlarmService alarmService;
 
     @ApiOperation(value = "회원가입", notes = "userName과 password를 입력받아 회원가입 성공유무를 반환")
     @ApiResponses({
@@ -70,6 +72,6 @@ public class UserController {
     public Response<Page<AlarmRes>> getAlarms(Authentication authentication,
                                               @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
         log.debug("getAlarms() 실행");
-        return Response.success( userService.getAlarms(authentication.getName(), pageable));
+        return Response.success(alarmService.getAlarms(authentication.getName(), pageable));
     }
 }
