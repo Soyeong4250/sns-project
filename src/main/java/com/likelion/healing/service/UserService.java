@@ -97,6 +97,6 @@ public class UserService implements UserDetailsService {
         UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
 
-        return alarmRepository.findByUser(user, pageable);
+        return alarmRepository.findByUser(user, pageable).map(AlarmRes::of);
     }
 }
