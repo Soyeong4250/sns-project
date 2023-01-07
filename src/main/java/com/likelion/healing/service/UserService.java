@@ -50,8 +50,7 @@ public class UserService implements UserDetailsService {
     public UserLoginRes login(UserLoginReq userLoginReq) {
         log.info("userName: {}", userLoginReq.getUserName());
 
-        UserEntity user = userRepository.findByUserName(userLoginReq.getUserName())
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userLoginReq.getUserName())));
+        UserEntity user = findUserByUserName(userLoginReq.getUserName());
 
         if(!encoder.matches(userLoginReq.getPassword(), user.getPassword())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PASSWORD, "회원 이름 또는 비밀번호를 다시 확인해주세요.");
@@ -63,18 +62,11 @@ public class UserService implements UserDetailsService {
                 .build();
     }
 
-    @Transactional
-    @Override
-    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
-    }
 
     @Transactional
     public UserRoleUpdateRes changeRole(Integer changeUserId, UserRole changeRole, String loginUserName) {
 
-        UserEntity loginUser = userRepository.findByUserName(loginUserName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", loginUserName)));
+        UserEntity loginUser = findUserByUserName(loginUserName);
 
         if (!loginUser.getRole().equals(UserRole.ADMIN)) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
@@ -88,6 +80,19 @@ public class UserService implements UserDetailsService {
                                 .message("권한 변경 완료")
                                 .role(changeRole)
                                 .build();
+    }
+
+    @Transactional
+    @Override
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+    }
+
+    // 중복 메서드
+    private UserEntity findUserByUserName(String userName) {
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
     }
     
 }

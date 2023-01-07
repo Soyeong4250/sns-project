@@ -29,8 +29,7 @@ public class PostService {
 
     @Transactional
     public PostRes createPost(PostReq postReq, String userName) {
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+        UserEntity user = findUserByUserName(userName);
 
         PostEntity post = PostEntity.builder()
                 .title(postReq.getTitle())
@@ -54,8 +53,7 @@ public class PostService {
 
     @Transactional
     public PostViewRes getPostById(Integer postId) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        PostEntity post = findPostById(postId);
         log.info("post.getComments.size : {}", post.getComments().size());
         return PostViewRes.builder()
                         .id(post.getId())
@@ -69,12 +67,9 @@ public class PostService {
 
     @Transactional
     public PostRes updatePostById(Integer postId, PostReq postEditReq, String userName) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        PostEntity post = findPostById(postId);
 
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
-//        System.out.println("확인 = " + authentication.getAuthorities().iterator().next().getAuthority().equals(UserRole.ADMIN.getAuthority()));
+        UserEntity user = findUserByUserName(userName);
 
         if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
@@ -90,11 +85,9 @@ public class PostService {
 
     @Transactional
     public PostRes deletePostById(Integer postId, String userName) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        PostEntity post = findPostById(postId);
 
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+        UserEntity user = findUserByUserName(userName);
 
         if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUsername().equals(user.getUsername())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
@@ -110,19 +103,16 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostViewRes> getMyFeed(Pageable pageable, String userName) {
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+        UserEntity user = findUserByUserName(userName);
 
         return postRepository.findByUser(user, pageable).map(PostViewRes::of);
     }
 
     @Transactional
     public void increaseLike(Integer postId, String userName) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        PostEntity post = findPostById(postId);
 
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+        UserEntity user = findUserByUserName(userName);
 
         likeRepository.findByPostAndUser(post, user)
                 .ifPresent(likeEntity -> {
@@ -136,11 +126,9 @@ public class PostService {
 
     @Transactional
     public void decreaseLike(Integer postId, String userName) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        PostEntity post = findPostById(postId);
 
-        UserEntity user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+        UserEntity user = findUserByUserName(userName);
 
         LikeEntity like = likeRepository.findByPostAndUser(post, user)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.LIKE_NOT_FOUND, "좋아요를 누른 적이 없습니다."));
@@ -150,10 +138,21 @@ public class PostService {
 
     @Transactional
     public Integer countLike(Integer postId) {
-        PostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        PostEntity post = findPostById(postId);
 
         Integer likesCnt = likeRepository.findByPost(post);
         return likesCnt;
     }
+
+    // 중복 메서드
+    private PostEntity findPostById(Integer postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+    }
+
+    private UserEntity findUserByUserName(String userName) {
+        return userRepository.findByUserName(userName)
+                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
+    }
+
 }
