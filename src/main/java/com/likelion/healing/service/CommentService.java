@@ -3,12 +3,10 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.CommentDeleteRes;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
-import com.likelion.healing.domain.entity.CommentEntity;
-import com.likelion.healing.domain.entity.PostEntity;
-import com.likelion.healing.domain.entity.UserEntity;
-import com.likelion.healing.domain.entity.UserRole;
+import com.likelion.healing.domain.entity.*;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
+import com.likelion.healing.repository.AlarmRepository;
 import com.likelion.healing.repository.CommentRepository;
 import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
@@ -29,6 +27,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final AlarmRepository alarmRepository;
 
     @Transactional
     public CommentRes createComment(Integer postId, @Valid CommentReq commentReq, String userName) {
@@ -42,6 +41,14 @@ public class CommentService {
         commentEntity.setUser(user);
         commentEntity.setPostAndComment(post);
         commentRepository.save(commentEntity);
+
+        AlarmEntity alarm = AlarmEntity.builder()
+                .alarmType(AlarmType.NEW_COMMENT_ON_POST)
+                .fromUserId(user.getId())
+                .targetId(post.getId())
+                .user(post.getUser())
+                .build();
+        alarmRepository.save(alarm);
         log.info("commentEntity id: {}", commentEntity.getId());
         return CommentRes.of(commentEntity);
     }
