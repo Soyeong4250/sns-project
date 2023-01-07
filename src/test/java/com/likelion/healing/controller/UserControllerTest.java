@@ -1,10 +1,8 @@
 package com.likelion.healing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.likelion.healing.domain.dto.UserJoinReq;
-import com.likelion.healing.domain.dto.UserJoinRes;
-import com.likelion.healing.domain.dto.UserLoginReq;
-import com.likelion.healing.domain.dto.UserLoginRes;
+import com.likelion.healing.domain.dto.*;
+import com.likelion.healing.domain.entity.AlarmType;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.service.UserService;
@@ -14,13 +12,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,7 +43,7 @@ class UserControllerTest {
 
     @Nested
     @DisplayName("회원가입 테스트")
-    public class JoinTest {
+    class JoinTest {
 
         @Test
         @WithMockUser
@@ -86,7 +89,7 @@ class UserControllerTest {
 
     @Nested
     @DisplayName("로그인 테스트")
-    public class LoginTest {
+    class LoginTest {
 
         @Test
         @WithMockUser
@@ -175,4 +178,52 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.message").value("권한 변경 완료"))
                 .andExpect(jsonPath("$.result.role").value(UserRole.ADMIN));
     }*/
+
+    @Test
+    @WithMockUser
+    @DisplayName("알람 목록 조회 성공")
+    void getAlarmsTest() throws Exception {
+        AlarmRes res = AlarmRes.builder()
+                                .id(1)
+                                .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                                .fromUserId(1)
+                                .targetId(1)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
+        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(res);
+
+        mockMvc.perform(get("/api/v1/users/alarms")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.alarmType").value("NEW_LIKE_ON_POST"))
+                .andExpect(jsonPath("$.result.fromUserId").value(1))
+                .andExpect(jsonPath("$.result.targetId").value(1))
+                .andExpect(jsonPath("$.result.text").value("new like!"))
+                .andExpect(jsonPath("$.result.createdAt").exists());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("알람 목록 조회 실패 - 로그인하지 않은 경우")
+    void notLogin() throws Exception {
+        AlarmRes res = AlarmRes.builder()
+                .id(1)
+                .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                .fromUserId(1)
+                .targetId(1)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        given(userService.getAlarms(any(String.class), any(Pageable.class))).willReturn(res);
+
+        mockMvc.perform(get("/api/v1/users/alarms")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
 }
