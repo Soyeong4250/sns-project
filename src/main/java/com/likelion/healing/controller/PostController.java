@@ -3,7 +3,6 @@ package com.likelion.healing.controller;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.service.PostService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

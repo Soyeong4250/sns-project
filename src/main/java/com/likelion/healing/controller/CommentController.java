@@ -3,7 +3,6 @@ package com.likelion.healing.controller;
 import com.likelion.healing.domain.dto.CommentDeleteRes;
 import com.likelion.healing.domain.dto.CommentReq;
 import com.likelion.healing.domain.dto.CommentRes;
-import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.service.CommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

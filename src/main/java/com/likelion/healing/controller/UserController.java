@@ -1,7 +1,6 @@
 package com.likelion.healing.controller;
 
 import com.likelion.healing.domain.dto.*;
-import com.likelion.healing.domain.entity.Response;
 import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.service.AlarmService;
 import com.likelion.healing.service.UserService;

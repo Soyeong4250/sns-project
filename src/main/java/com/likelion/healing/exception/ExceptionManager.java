@@ -1,7 +1,7 @@
 package com.likelion.healing.exception;
 
 
-import com.likelion.healing.domain.entity.Response;
+import com.likelion.healing.controller.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
