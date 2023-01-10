@@ -225,7 +225,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
 
             mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -235,7 +235,7 @@ class PostControllerTest {
                     .andExpect(status().isInternalServerError())
                     .andExpect(jsonPath("$.resultCode").value("ERROR"))
                     .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
-                    .andExpect(jsonPath("$.result.message").value("DB에러"));
+                    .andExpect(jsonPath("$.result.message").value("DB 에러"));
         }
 
         @Test
@@ -324,7 +324,7 @@ class PostControllerTest {
         void notFoundDatabase() throws Exception {
             Integer postId = 1;
 
-            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB에러"));
+            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.DATABASE_ERROR, "DB 에러"));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                             .with(csrf()))
@@ -332,7 +332,7 @@ class PostControllerTest {
                     .andExpect(status().isInternalServerError())
                     .andExpect(jsonPath("$.resultCode").value("ERROR"))
                     .andExpect(jsonPath("$.result.errorCode").value("DATABASE_ERROR"))
-                    .andExpect(jsonPath("$.result.message").value("DB에러"));
+                    .andExpect(jsonPath("$.result.message").value("DB 에러"));
         }
     }
 
@@ -411,7 +411,8 @@ class PostControllerTest {
         void increaseLike() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            doNothing().when(postService).increaseLike(fixture.getPostId(), fixture.getUserName());
+            given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
+            doNothing().when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                    .with(csrf())
@@ -427,7 +428,7 @@ class PostControllerTest {
         void NotLogin() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            doNothing().when(postService).increaseLike(any(Integer.class), any(String.class));
+            doNothing().when(postService).pushLike(any(Integer.class), any(String.class));
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -435,7 +436,7 @@ class PostControllerTest {
                     .andDo(print())
                     .andExpect(status().isUnauthorized());
 
-            verify(postService, never()).increaseLike(any(Integer.class), any(String.class));
+            verify(postService, never()).pushLike(any(Integer.class), any(String.class));
         }
 
         @Test
@@ -444,7 +445,7 @@ class PostControllerTest {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
             doThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."))
-                    .when(postService).increaseLike(fixture.getPostId(), fixture.getUserName());
+                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -462,7 +463,7 @@ class PostControllerTest {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
             doThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())))
-                    .when(postService).increaseLike(fixture.getPostId(), fixture.getUserName());
+                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -484,7 +485,7 @@ class PostControllerTest {
         void decreaseLike() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            doNothing().when(postService).decreaseLike(fixture.getPostId(), fixture.getUserName());
+            doNothing().when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                    .with(csrf())
@@ -500,7 +501,7 @@ class PostControllerTest {
         void NotLogin() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            doNothing().when(postService).decreaseLike(any(Integer.class), any(String.class));
+            doNothing().when(postService).pushLike(any(Integer.class), any(String.class));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -508,7 +509,7 @@ class PostControllerTest {
                     .andDo(print())
                     .andExpect(status().isUnauthorized());
 
-            verify(postService, never()).increaseLike(any(Integer.class), any(String.class));
+            verify(postService, never()).pushLike(any(Integer.class), any(String.class));
         }
 
         @Test
@@ -517,7 +518,7 @@ class PostControllerTest {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
             doThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."))
-                    .when(postService).decreaseLike(fixture.getPostId(), fixture.getUserName());
+                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -535,7 +536,7 @@ class PostControllerTest {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
             doThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())))
-                    .when(postService).decreaseLike(fixture.getPostId(), fixture.getUserName());
+                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
