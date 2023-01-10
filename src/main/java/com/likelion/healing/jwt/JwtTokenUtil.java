@@ -1,4 +1,4 @@
-package com.likelion.healing.util;
+package com.likelion.healing.jwt;
 
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
