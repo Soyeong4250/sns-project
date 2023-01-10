@@ -18,8 +18,8 @@ public class ExceptionManager {
     }
 
     @ExceptionHandler(SQLException.class)
-    public ResponseEntity<?> databaseExceptionHandler(SQLException e) {
-        ErrorResult errorResult = new ErrorResult(ErrorCode.DATABASE_ERROR, e.getMessage());
+    public ResponseEntity<?> databaseExceptionHandler() {
+        ErrorResult errorResult = new ErrorResult(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
         return ResponseEntity.status(errorResult.getErrorCode().getStatus())
                 .body(Response.error(errorResult));
     }
