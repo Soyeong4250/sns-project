@@ -51,7 +51,8 @@ public class UserController {
     @ApiOperation(value = "회원 권한 변경", notes = "변경할 권한을 입력받아 권한 변경 성공유무를 반환")
     @ApiResponses({
             @ApiResponse(code = 200, message = "권한 변경 성공"),
-            @ApiResponse(code = 403, message = "접근 권한 없음")
+            @ApiResponse(code = 403, message = "접근 권한 없음"),
+            @ApiResponse(code = 404, message = "일치하는 회원 이름 없음 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
     })
     @Secured(UserRole.Authority.ADMIN)
     @PostMapping("/{userId}/role/change")
