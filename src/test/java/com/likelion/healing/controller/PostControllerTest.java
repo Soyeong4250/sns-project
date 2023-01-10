@@ -184,7 +184,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+            given(postService.updatePostById(any(Integer.class), any(PostReq.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUserName())));
 
             mockMvc.perform(put(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
@@ -293,7 +293,7 @@ class PostControllerTest {
                     .build();
             Integer postId = 1;
 
-            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUsername())));
+            given(postService.deletePostById(any(Integer.class), any(String.class))).willThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", user.getUserName())));
 
             mockMvc.perform(delete(String.format("/api/v1/posts/%d", postId))
                             .with(csrf())
