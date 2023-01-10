@@ -11,9 +11,6 @@ import com.likelion.healing.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
@@ -42,7 +39,7 @@ public class UserService implements UserDetailsService {
         UserEntity user = userRepository.save(userJoinReq.toEntity(encoder.encode(userJoinReq.getPassword())));
         return UserJoinRes.builder()
                 .userId(user.getId())
-                .userName(user.getUsername())
+                .userName(user.getUserName())
                 .build();
     }
 
@@ -82,17 +79,10 @@ public class UserService implements UserDetailsService {
                                 .build();
     }
 
-    @Transactional
-    @Override
-    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+    // 중복 메서드
+    public UserEntity findUserByUserName(String userName) {
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
     }
 
-    // 중복 메서드
-    private UserEntity findUserByUserName(String userName) {
-        return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", userName)));
-    }
-    
 }
