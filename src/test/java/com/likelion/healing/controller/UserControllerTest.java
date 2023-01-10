@@ -47,11 +47,11 @@ class UserControllerTest {
         @DisplayName("회원가입 성공")
         void successfulJoin() throws Exception {
             UserJoinReq req = UserJoinReq.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345678")
                     .build();
 
-            given(userService.join(any(UserJoinReq.class))).willReturn(new UserJoinRes(1, "Soyeong"));
+            given(userService.join(any(UserJoinReq.class))).willReturn(new UserJoinRes(1, "userName"));
 
             mockMvc.perform(post("/api/v1/users/join")
                         .with(csrf())
@@ -60,7 +60,7 @@ class UserControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.userId").value(1))
-                    .andExpect(jsonPath("$.result.userName").value("Soyeong"))
+                    .andExpect(jsonPath("$.result.userName").value("userName"))
                     .andDo(print());
         }
 
@@ -69,7 +69,7 @@ class UserControllerTest {
         @DisplayName("회원가입 실패 - userName 중복인 경우")
         void failedJoin() throws Exception {
             UserJoinReq req = UserJoinReq.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345678")
                     .build();
 
@@ -93,7 +93,7 @@ class UserControllerTest {
         @DisplayName("로그인 성공")
         void successfulLogin() throws Exception {
             UserLoginReq req = UserLoginReq.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345678")
                     .build();
 
@@ -113,7 +113,7 @@ class UserControllerTest {
         @DisplayName("로그인 실패 - 존재하지 않는 회원")
         void notFoundUser() throws Exception {
             UserLoginReq req = UserLoginReq.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345678")
                     .build();
 
@@ -134,7 +134,7 @@ class UserControllerTest {
         @DisplayName("로그인 실패 - 비밀번호가 일치하지 않는 경우")
         void invalidPassword() throws Exception {
             UserLoginReq req = UserLoginReq.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345678")
                     .build();
 

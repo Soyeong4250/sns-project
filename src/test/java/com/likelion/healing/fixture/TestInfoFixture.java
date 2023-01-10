@@ -9,7 +9,7 @@ public class TestInfoFixture {
         TestInfo info = new TestInfo();
         info.setPostId(1);
         info.setUserId(1);
-        info.setUserName("Soyeong");
+        info.setUserName("userName");
         info.setPassword("12345");
         info.setRole(UserRole.USER);
         info.setTitle("title1");
