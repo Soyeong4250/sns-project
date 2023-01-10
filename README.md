@@ -2,7 +2,28 @@
 
 ## Project Introduction
 
-멋쟁이 사자처럼 최종 프로젝트로, SNS 개발을 위한 프로젝트 입니다.
+멋쟁이사자처럼 개인 종합 프로젝트로, SNS Project 입니다. MutsaSNS는 회원(회원가입, 로그인), 게시글(포스트) CRUD, 댓글 CRUD, 좋아요 기능, 알림 기능을 담고 있습니다.
+
+<br />
+
+👉 [프로젝트 Notion](https://www.notion.so/MutsaSNS-39729ab4eea043fda069d4938c8c278d)
+
+<br />
+
+<br />
+
+## Project Install
+
+Environment Variable에 아래의 값들을 설정하고 실행
+
+|        환경변수 명         |                  입력 형식                  |
+| :------------------------: | :-----------------------------------------: |
+|   SPRING_DATASOURCE_URL    | jdbc:mysql://ec2서버url:3306/원하는Schema명 |
+| SPRING_DATASOURCE_USERNAME |                    root                     |
+| SPRING_DATASOURCE_PASSWORD |                    root                     |
+|      JWT_TOKEN_SECRET      |              원하는 JWT 토큰명              |
+
+<br />
 
 <br />
 
@@ -14,11 +35,11 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 <br />
 
+<br />
+
 ## Service Architecture
 
-!(./assets/image-20221227181107062.png)
-
-![image-20221227190312548](./assets/image-20221227190312548.png)
+![image-20230110142913259](./assets/image-20230110142913259.png)
 
 <br />
 
@@ -26,7 +47,7 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 ## ERD
 
-![image-20221227183630243](./assets/image-20221227183630243.png)
+![image-20230110171022009](./assets/image-20230110171022009.png)
 
 <br />
 
@@ -41,6 +62,12 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 - [x] 회원가입
 - [x] 로그인
 - [x] 포스트 CRUD
+- [x] 댓글 CRUD
+- [x] 좋아요 등록 및 취소
+- [x] 좋아요 수 조회
+- [x] 마이피드 조회
+- [x] 알람 등록
+- [x] 알람 조회
 
 <br />
 
@@ -52,285 +79,26 @@ ec2 (퍼블릭 IPv4 DNS) : http://ec2-43-201-32-133.ap-northeast-2.compute.amazo
 
 - [x] ADMIN 회원일 경우 자신이 작성한 글 또는 댓글의 수정 삭제가 가능
 
-  👉 ADMIN 계정 (userName: Soyeong, password: 12345)
+  👉 ADMIN 계정 (userName: userName, password: 12345678)
 
 <br />
 
 <br />
 
-### 1주차 미션 요약
+## 미션 요약
 
-------
+👉 [1주차 미션 요약 보기](./note/1주차미션요약.md)
 
-**[접근 방법]**
+👉 [2주차 미션 요약 보기](./note/2주차미션요약.md)
 
-#### 1️⃣ 회원가입 & 로그인
 
-👉 [구현 내용](./note/회원가입&로그인.md)
-
-<br />
-
-#### 2️⃣ 포스트 CRUD
-
-👉  [구현 내용](./note/포스트CRUD.md)
-
-<br />
-
-#### 3️⃣ 회원 권한 수정
-
-- `@Secured` 와 `@EnableGlobalMethodSecurity(securedEnabled = true)` 를 적용함으로써 `ADMIN` 권한을 가지고 있는 User만 접근 가능
-- 혹시 모를 예외에 대비하여 Service에서도 현재 로그인한 User의 권한이 `ADMIN` 인지 확인하는 예외 처리를 추가로 진행 
-- `USER` 권한을 가진 회원이 접근 시 `403 Error` 가 발생하여 이를 ErrorCode에 추가하였으나 예외처리는 아직 하지 못함😢
-
-<br />
-
-**[특이사항]**
-
-- 더 깔끔한 코드를 작성할 수도 있었을 것 같은데 기능의 작동을 먼저 생각하다보니 코드가 조금 지저분해진 것 같음 
-- 8️⃣ 회원 권한 수정 시 `USER` 권한을 가진 회원이 접근했을 때 발생하는 **`403 Error`에 대한 예외처리**를 하지 못한 점이 아쉬움
-- `@Secured` 외에도 사용자의 **접근 권한에 대해 설정하는 Security 관련 어노테이션**에 대해 학습이 더 필요
-- JPA의 **Dirty Check (변경 감지)** 에 대해 이번 개발을 진행하며 처음 알게 되어 추가로 학습을 할 예정
-- **프론트엔드**를 추가하지 못한 점이 아쉬움
-
-<br />
-
-**[참고한 자료 및  소스 코드]**
-
-- [Git] 이전에 학습했던 Git과 정리 내용 : https://github.com/Soyeong4250/spring-security-exercise
-- [도서] 스프링 부트 핵심 가이드
-- [도서] 자바 ORM 표준 JPA 프로그래밍
-
-<br />
-
-<br />
 
 ## Endpoint
 
-**[User]**
+👉 [Endpoint](https://www.notion.so/EndPoint-49d3a4c127884c73aaba5eb1ea0cda06)
 
-1️⃣ 회원가입
 
-`POST /api/v1/users/join`
 
-Request Body
+## ErrorCode
 
-```json
-{
-  "password": "string",
-  "userName": "string"
-}
-```
-
-Response Body
-
-```json
-{
-  "result": {
-    "userId": int,
-    "userName": "string"
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-2️⃣ 로그인
-
-`POST /api/v1/users/login`
-
-Request Body
-
-```json
-{
-  "password": "string",
-  "userName": "string"
-}
-```
-
-Response Body
-
-```json
-{
-  "result": {
-    "jwt": "string"
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-3️⃣ 권한 수정 
-
-`POST /api/v1/users/{userId}/role/change`
-
-⚠ Admin만 가능
-
-Request Body
-
-```json
-{
-  "role": "string(Enum)"
-}
-```
-
-Response Body
-
-```json
-{
-  "result": {
-    "message": "string",
-    "role": "string(Enum)"
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-**[Post]**
-
-1️⃣ 포스트 등록
-
-`POST /api/v1/posts`
-
-Request Body
-
-```json
-{
-  "body": "string",
-  "title": "string"
-}
-```
-
-Response Body
-
-```JSON
-{
-  "result": {
-    "message": "string",
-    "postId": int
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-2️⃣ 포스트 상세 조회
-
-`GET /api/v1/posts/{id}`
-
-Response Body
-
-```json
-{
-  "result": {
-    "body": "string",
-    "createdAt": "string",
-    "id": int,
-    "lastModifiedAt": "string",
-    "title": "string",
-    "userName": "string"
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-3️⃣ 포스트 목록 조회
-
-`GET /api/v1/posts`
-
-Response Body
-
-```json
-{
-  "result": {
-    "content": [
-      {
-        "body": "string",
-        "createdAt": "string",
-        "id": 0,
-        "lastModifiedAt": "string",
-        "title": "string",
-        "userName": "string"
-      }
-    ],
-    "empty": true,
-    "first": true,
-    "last": true,
-    "number": 0,
-    "numberOfElements": 0,
-    "pageable": {
-      "offset": 0,
-      "pageNumber": 0,
-      "pageSize": 0,
-      "paged": true,
-      "sort": {
-        "empty": true,
-        "sorted": true,
-        "unsorted": true
-      },
-      "unpaged": true
-    },
-    "size": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "totalElements": 0,
-    "totalPages": 0
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-4️⃣ 포스트 수정
-
-`PUT /api/v1/posts/{id}`
-
-Request Body
-
-```json
-{
-  "body": "string",
-  "title": "string"
-}
-```
-
-Response Body
-
-```json
-{
-  "result": {
-    "message": "string",
-    "postId": int
-  },
-  "resultCode": "string"
-}
-```
-
-<br />
-
-5️⃣ 포스트 삭제
-
-`DELETE /api/v1/posts/{id}`
-
-Response Body
-
-```json
-{
-  "result": {
-    "message": "string",
-    "postId": int
-  },
-  "resultCode": "string"
-}
-```
-
+👉 [ErrorCode](https://www.notion.so/ed7f69aa573f468385c1cddbdb525885)
