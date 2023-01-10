@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PostController.class)
-@WithMockUser(username = "Soyeong")
+@WithMockUser(username = "userName")
 class PostControllerTest {
 
     @Autowired
@@ -145,7 +145,7 @@ class PostControllerTest {
                 .id(1)
                 .title("title1")
                 .body("body1")
-                .userName("Soyeong")
+                .userName("userName")
                 .createdAt(LocalDateTime.now())
                 .lastModifiedAt(LocalDateTime.now())
                 .build();
@@ -161,7 +161,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.id").value(1))
                 .andExpect(jsonPath("$.result.title").value("title1"))
                 .andExpect(jsonPath("$.result.body").value("body1"))
-                .andExpect(jsonPath("$.result.userName").value("Soyeong"))
+                .andExpect(jsonPath("$.result.userName").value("userName"))
                 .andExpect(jsonPath("$.result.createdAt").exists())
                 .andExpect(jsonPath("$.result.lastModifiedAt").exists());
     }
@@ -179,7 +179,7 @@ class PostControllerTest {
                     .body("test body")
                     .build();
             UserEntity user = UserEntity.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345")
                     .build();
             Integer postId = 1;
@@ -288,7 +288,7 @@ class PostControllerTest {
         @DisplayName("포스트 삭제 실패 - 인증 실패")
         void authenticationFailed() throws Exception {
             UserEntity user = UserEntity.builder()
-                    .userName("Soyeong")
+                    .userName("userName")
                     .password("12345")
                     .build();
             Integer postId = 1;
@@ -403,7 +403,7 @@ class PostControllerTest {
 
 
     @Nested
-    @DisplayName("좋아요 +1 테스트")
+    @DisplayName("좋아요 테스트")
     class IncreaseLikeTest {
 
         @Test
@@ -411,14 +411,14 @@ class PostControllerTest {
         void increaseLike() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            given(postService.getMyFeed(any(Pageable.class), any(String.class))).willReturn(Page.empty());
-            doNothing().when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
+            given(postService.pushLike(any(Integer.class), any(String.class))).willReturn("좋아요를 눌렀습니다.");
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                    .with(csrf())
                    .contentType(MediaType.APPLICATION_JSON))
                    .andDo(print())
                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                    .andExpect(jsonPath("$.result").value("좋아요를 눌렀습니다."));
         }
 
@@ -427,8 +427,6 @@ class PostControllerTest {
         @DisplayName("좋아요 누르기 실패 - 로그인 하지 않은 경우")
         void NotLogin() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-
-            doNothing().when(postService).pushLike(any(Integer.class), any(String.class));
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -444,8 +442,8 @@ class PostControllerTest {
         void NotFoundPost () throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            doThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."))
-                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
+            given(postService.pushLike(any(Integer.class), any(String.class)))
+                    .willThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
             mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
@@ -474,78 +472,21 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.errorCode").value("USERNAME_NOT_FOUND"))
                     .andExpect(jsonPath("$.result.message").value(String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
         }
-    }
-
-    @Nested
-    @DisplayName("좋아요 취소 테스트")
-    class DecreaseLikeTest {
 
         @Test
         @DisplayName("좋아요 취소 성공")
         void decreaseLike() throws Exception {
             TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-            doNothing().when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
+            given(postService.pushLike(any(Integer.class), any(String.class))).willReturn("좋아요를 취소했습니다.");
 
-            mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
-                   .with(csrf())
-                   .contentType(MediaType.APPLICATION_JSON))
-                   .andDo(print())
-                   .andExpect(status().isOk())
-                   .andExpect(jsonPath("$.result").value("좋아요를 취소했습니다."));
-        }
-
-        @Test
-        @WithAnonymousUser
-        @DisplayName("좋아요 취소 실패 - 로그인 하지 않은 경우")
-        void NotLogin() throws Exception {
-            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-
-            doNothing().when(postService).pushLike(any(Integer.class), any(String.class));
-
-            mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
+            mockMvc.perform(post(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
-                    .andExpect(status().isUnauthorized());
-
-            verify(postService, never()).pushLike(any(Integer.class), any(String.class));
-        }
-
-        @Test
-        @DisplayName("좋아요 취소 실패 - 포스트가 없는 경우")
-        void NotFoundPost () throws Exception {
-            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-
-            doThrow(new HealingSnsAppException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."))
-                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
-
-            mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
-                            .with(csrf())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                    .andExpect(jsonPath("$.result.errorCode").value("POST_NOT_FOUND"))
-                    .andExpect(jsonPath("$.result.message").value("해당 포스트가 없습니다."));
-        }
-
-        @Test
-        @DisplayName("좋아요 취소 실패 - 현재 로그인한 회원이 존재하지 않는 경우")
-        void NotFoundUser() throws Exception {
-            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-
-            doThrow(new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())))
-                    .when(postService).pushLike(fixture.getPostId(), fixture.getUserName());
-
-            mockMvc.perform(delete(String.format("/api/v1/posts/%d/likes", fixture.getPostId()))
-                            .with(csrf())
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                    .andExpect(jsonPath("$.result.errorCode").value("USERNAME_NOT_FOUND"))
-                    .andExpect(jsonPath("$.result.message").value(String.format("%s은(는) 없는 회원입니다.", fixture.getUserName())));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result").value("좋아요를 취소했습니다."));
         }
     }
 
