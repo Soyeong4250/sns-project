@@ -114,34 +114,18 @@ public class PostController {
         return Response.success(postViewResPage);
     }
 
-    @ApiOperation(value = "좋아요 누르기", notes = "id, Token을 입력받아 좋아요 누르기 성공유무 반환")
+    @ApiOperation(value = "좋아요 누르기 or 취소", notes = "id, Token을 입력받아 좋아요를 누른 결과를 반환")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "좋아요 누르기 성공"),
+            @ApiResponse(code = 200, message = "좋아요 누르기 or 취소 성공"),
             @ApiResponse(code = 401, message = "현재 로그인이 되어 있지 않은 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
             @ApiResponse(code = 404, message = "포스트를 찾지 못하는 경우 👉 POST_NOT_FOUND, 에러 메세지 반환"),
             @ApiResponse(code = 404, message = "현재 로그인한 회원을 찾지 못하는 경우 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
             @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
     })
     @PostMapping("/{id}/likes")
-    public Response<String> increaseLike(@PathVariable(name = "id") Integer postId, Authentication authentication) throws SQLException {
+    public Response<String> pushLike(@PathVariable(name = "id") Integer postId, Authentication authentication) throws SQLException {
         log.info("userName : {}", authentication.getName());
-        postService.increaseLike(postId, authentication.getName());
-        return Response.success("좋아요를 눌렀습니다.");
-    }
-
-    @ApiOperation(value = "좋아요 취소", notes = "id, Token을 입력받아 좋아요 취소 성공유무 반환")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "좋아요 취소 성공"),
-            @ApiResponse(code = 401, message = "현재 로그인이 되어 있지 않은 경우 👉 INVALID_PERMISSION, 에러 메세지 반환"),
-            @ApiResponse(code = 404, message = "포스트를 찾지 못하는 경우 👉 POST_NOT_FOUND, 에러 메세지 반환"),
-            @ApiResponse(code = 404, message = "현재 로그인한 회원을 찾지 못하는 경우 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
-            @ApiResponse(code = 500, message = "데이터베이스 예외가 발생한 경우 👉 DATABASE_ERROR, 에러 메세지 반환"),
-    })
-    @DeleteMapping("/{id}/likes")
-    public Response<String> decreaseLike(@PathVariable(name = "id") Integer postId, Authentication authentication) throws SQLException {
-        log.info("userName : {}", authentication.getName());
-        postService.decreaseLike(postId, authentication.getName());
-        return Response.success("좋아요를 취소했습니다.");
+        return Response.success( postService.pushLike(postId, authentication.getName()));
     }
 
     @ApiOperation(value = "좋아요 개수 구하기", notes = "id를 입력받아 해당 포스트의 좋아요 개수 반환")

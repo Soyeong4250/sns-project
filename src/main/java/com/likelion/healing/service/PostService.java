@@ -3,7 +3,10 @@ package com.likelion.healing.service;
 import com.likelion.healing.domain.dto.PostReq;
 import com.likelion.healing.domain.dto.PostRes;
 import com.likelion.healing.domain.dto.PostViewRes;
-import com.likelion.healing.domain.entity.*;
+import com.likelion.healing.domain.entity.LikeEntity;
+import com.likelion.healing.domain.entity.PostEntity;
+import com.likelion.healing.domain.entity.UserEntity;
+import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.HealingSnsAppException;
 import com.likelion.healing.repository.LikeRepository;
@@ -16,11 +19,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PostService {
-
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -109,31 +113,30 @@ public class PostService {
     }
 
     @Transactional
-    public void increaseLike(Integer postId, String userName) {
+    public String pushLike(Integer postId, String userName) {
         PostEntity post = findPostById(postId);
 
         UserEntity user = findUserByUserName(userName);
 
-        likeRepository.findByPostAndUser(post, user)
-                .ifPresent(likeEntity -> {
-                    throw new HealingSnsAppException(ErrorCode.DUPLICATED_LIKE, "이미 좋아요를 눌렀습니다.");
-                });
+        // void를 return
+        /*likeRepository.findByPostAndUser(post, user)
+                        .ifPresentOrElse((likeEntity) -> {
+                            likeRepository.delete(likeEntity);
+                        },
+                        () -> {
+                            likeRepository.save(LikeEntity.builder().user(user).post(post).build());
+                        });*/
 
-        likeRepository.save(LikeEntity.builder().post(post).user(user).build());
-
-        alarmService.sendAlarm(user, post, AlarmType.NEW_LIKE_ON_POST);
-    }
-
-    @Transactional
-    public void decreaseLike(Integer postId, String userName) {
-        PostEntity post = findPostById(postId);
-
-        UserEntity user = findUserByUserName(userName);
-
-        LikeEntity like = likeRepository.findByPostAndUser(post, user)
-                .orElseThrow(() -> new HealingSnsAppException(ErrorCode.LIKE_NOT_FOUND, "좋아요를 누른 적이 없습니다."));
-
-        likeRepository.delete(like);
+        Optional<LikeEntity> like = likeRepository.findByPostAndUser(post, user);
+        if(like.isEmpty()) {
+            log.debug("like.isEmpty() 실행");
+            likeRepository.save(LikeEntity.builder().post(post).user(user).build());
+            return "좋아요를 눌렀습니다.";
+        } else {
+            log.info("like Id : {}", like.get().getId());
+            likeRepository.delete(like.get());
+            return "좋아요를 취소했습니다.";
+        }
     }
 
     @Transactional
