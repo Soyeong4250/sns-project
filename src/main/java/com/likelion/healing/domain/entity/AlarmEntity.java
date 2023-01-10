@@ -1,8 +1,11 @@
 package com.likelion.healing.domain.entity;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
@@ -10,6 +13,9 @@ import javax.persistence.*;
 @Table(name = "alarm")
 @NoArgsConstructor
 @Getter
+@EqualsAndHashCode(callSuper = true)
+@Where(clause = "deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE alarm SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
 public class AlarmEntity extends BaseEntity {
 
     @Id
