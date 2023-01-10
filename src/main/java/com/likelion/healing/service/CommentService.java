@@ -41,7 +41,7 @@ public class CommentService {
         commentEntity.setPost(post);
         commentRepository.save(commentEntity);
 
-        log.info("userName : {}", user.getUsername());
+        log.info("userName : {}", user.getUserName());
         log.info("postId : {}", post.getId());
         alarmService.sendAlarm(user, post, AlarmType.NEW_COMMENT_ON_POST);
 
@@ -68,7 +68,7 @@ public class CommentService {
         UserEntity user = userRepository.findByUserName(userName)
                                         .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 존재하지 않는 회원입니다.", userName)));
 
-        if(!user.getUsername().equals(comment.getUser().getUsername())) {
+        if(!user.getRole().equals(UserRole.ADMIN.getAuthority()) && !user.getUserName().equals(comment.getUser().getUserName())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
@@ -93,7 +93,7 @@ public class CommentService {
         CommentEntity comment = commentRepository.findByPostIdAndId(postId, commentId)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.COMMENT_NOT_FOUND, String.format("%d번 포스트에는 %d번 댓글이 존재하지 않습니다.", postId, commentId)));
 
-        if(!user.getRole().equals(UserRole.ADMIN.getAuthority()) && !user.getUsername().equals(comment.getUser().getUsername())) {
+        if(!user.getRole().equals(UserRole.ADMIN.getAuthority()) && !user.getUserName().equals(comment.getUser().getUserName())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
         commentRepository.deleteById(commentId);
