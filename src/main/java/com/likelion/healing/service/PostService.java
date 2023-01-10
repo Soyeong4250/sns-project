@@ -63,7 +63,7 @@ public class PostService {
                         .id(post.getId())
                         .title(post.getTitle())
                         .body(post.getBody())
-                        .userName(post.getUser().getUsername())
+                        .userName(post.getUser().getUserName())
                         .createdAt(post.getCreatedAt())
                         .lastModifiedAt(post.getUpdatedAt())
                         .build();
@@ -75,7 +75,7 @@ public class PostService {
 
         UserEntity user = findUserByUserName(userName);
 
-        if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUsername().equals(user.getUsername())) {
+        if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUserName().equals(user.getUserName())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 
@@ -93,7 +93,7 @@ public class PostService {
 
         UserEntity user = findUserByUserName(userName);
 
-        if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUsername().equals(user.getUsername())) {
+        if(!user.getRole().equals(UserRole.ADMIN) && !post.getUser().getUserName().equals(user.getUserName())) {
             throw new HealingSnsAppException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
         }
 

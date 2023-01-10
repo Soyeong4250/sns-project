@@ -35,9 +35,9 @@ public class AlarmService {
 
     @Transactional
     public void sendAlarm(UserEntity user, PostEntity post, AlarmType alarmType) {
-        log.info("userName : {}", user.getUsername());
+        log.info("userName : {}", user.getUserName());
         log.info("postId : {}", post.getId());
-        if(!user.getUsername().equals(post.getUser().getUsername())) {
+        if(!user.getUserName().equals(post.getUser().getUserName())) {
             AlarmEntity alarm = AlarmEntity.builder()
                     .alarmType(alarmType)
                     .fromUserId(user.getId())

@@ -37,7 +37,7 @@ public class CommentRes {
         return CommentRes.builder()
                 .id(commentEntity.getId())
                 .comment(commentEntity.getComment())
-                .userName(commentEntity.getUser().getUsername())
+                .userName(commentEntity.getUser().getUserName())
                 .postId(commentEntity.getPost().getId())
                 .createdAt(commentEntity.getCreatedAt())
                 .lastModifiedAt(commentEntity.getUpdatedAt())
