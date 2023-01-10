@@ -15,6 +15,7 @@ import com.likelion.healing.repository.PostRepository;
 import com.likelion.healing.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -31,44 +32,48 @@ class PostServiceTest {
     private AlarmService alarmService = mock(AlarmService.class);
     private PostService postService = new PostService(postRepository, userRepository, likeRepository, alarmService);
 
-    @Test
-    @DisplayName("포스트 등록 성공")
-    void successfulAddPost() {
-        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+    @Nested
+    @DisplayName("포스트 등록 테스트")
+    class createPost {
+        @Test
+        @DisplayName("포스트 등록 성공")
+        void successCreatePost() {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        UserEntity mockUser = mock(UserEntity.class);
-        PostEntity mockPost = mock(PostEntity.class);
+            UserEntity mockUser = mock(UserEntity.class);
+            PostEntity mockPost = mock(PostEntity.class);
 
-        Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenReturn(Optional.of(mockUser));
+            Mockito.when(userRepository.findByUserName(fixture.getUserName()))
+                    .thenReturn(Optional.of(mockUser));
 
-        Mockito.when(postRepository.save(any(PostEntity.class)))
-                .thenReturn(mockPost);
+            Mockito.when(postRepository.save(any(PostEntity.class)))
+                    .thenReturn(mockPost);
 
-        Assertions.assertDoesNotThrow(() -> postService.createPost(new PostReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
-    }
-
-    @Test
-    @DisplayName("포스트 등록 실패 - 회원이 존재하지 않을 때")
-    void notFoundWriter() {
-        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-
-        UserEntity givenUser = mock(UserEntity.class);
-        Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenReturn(Optional.empty());
-
-        PostEntity mockPost = mock(PostEntity.class);
-        Mockito.when(postRepository.save(any(PostEntity.class)))
-                .thenReturn(mockPost);
-
-        try {
-            PostRes postRes = postService.createPost(
-                    new PostReq("title1", "body1"), givenUser.getUsername());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+            Assertions.assertDoesNotThrow(() -> postService.createPost(new PostReq(fixture.getTitle(), fixture.getBody()), fixture.getUserName()));
         }
 
-        verify(postRepository, never()).save(any());
+        @Test
+        @DisplayName("포스트 등록 실패 - 회원이 존재하지 않을 때")
+        void notFoundWriter() {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+            UserEntity givenUser = mock(UserEntity.class);
+            Mockito.when(userRepository.findByUserName(fixture.getUserName()))
+                    .thenReturn(Optional.empty());
+
+            PostEntity mockPost = mock(PostEntity.class);
+            Mockito.when(postRepository.save(any(PostEntity.class)))
+                    .thenReturn(mockPost);
+
+            try {
+                PostRes postRes = postService.createPost(
+                        new PostReq("title1", "body1"), givenUser.getUsername());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+            }
+
+            verify(postRepository, never()).save(any());
+        }
     }
 
     @Test
@@ -98,125 +103,134 @@ class PostServiceTest {
         verify(postRepository).findById(any());
     }
 
-    @Test
-    @DisplayName("포스트 수정 실패 - 포스트 존재하지 않는 경우")
-    void update_notFoundPost() {
-        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+    @Nested
+    @DisplayName("포스트 수정")
+    class updatePost {
+        @Test
+        @DisplayName("포스트 수정 실패 - 포스트 존재하지 않는 경우")
+        void update_notFoundPost() {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        Mockito.when(postRepository.findById(fixture.getPostId()))
-                .thenReturn(Optional.empty());
+            Mockito.when(postRepository.findById(fixture.getPostId()))
+                    .thenReturn(Optional.empty());
 
-        try {
-            postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+            try {
+                postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+            }
+        }
+
+        @Test
+        @DisplayName("포스트 수정 실패 - 작성자와 유저가 일치하지 않는 경우")
+        void update_notFoundUser() {
+            UserEntity givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
+            UserEntity givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
+            PostEntity givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
+
+            Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
+                    .thenReturn(Optional.of(givenUser2));
+
+            Mockito.when(postRepository.findById(givenPost.getId()))
+                    .thenReturn(Optional.of(givenPost));
+
+            try {
+                postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+            }
+
+            verify(userRepository, atLeastOnce()).findByUserName(any());
+            verify(postRepository, atLeastOnce()).findById(any());
+        }
+
+        @Test
+        @DisplayName("포스트 수정 실패 - 유저가 존재하지 않는 경우")
+        void update_mismatchedAuthorAndUser() {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+            PostEntity mockPost = mock(PostEntity.class);
+            Mockito.when(postRepository.findById(fixture.getPostId()))
+                    .thenReturn(Optional.of(mockPost));
+
+            Mockito.when(userRepository.findByUserName(fixture.getUserName()))
+                    .thenReturn(Optional.empty());
+
+            PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
+            Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
+            try {
+                postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+            }
+
+            verify(postRepository, never()).save(any());
         }
     }
 
-    @Test
-    @DisplayName("포스트 수정 실패 - 작성자와 유저가 일치하지 않는 경우")
-    void update_notFoundUser() {
-        UserEntity givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
-        UserEntity givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
-        PostEntity givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
+    @Nested
+    @DisplayName("포스트 삭제")
+    class deletePost {
+        @Test
+        @DisplayName("포스트 삭제 실패 - 유저가 존재하지 않는 경우")
+        void mismatchedAuthorAndUser() {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
-                .thenReturn(Optional.of(givenUser2));
+            PostEntity mockPost = mock(PostEntity.class);
+            Mockito.when(postRepository.findById(fixture.getPostId()))
+                    .thenReturn(Optional.of(mockPost));
 
-        Mockito.when(postRepository.findById(givenPost.getId()))
-                .thenReturn(Optional.of(givenPost));
+            Mockito.when(userRepository.findByUserName(fixture.getUserName()))
+                    .thenReturn(Optional.empty());
 
-        try {
-            postService.updatePostById(givenPost.getId(), new PostReq("title", "body"), givenUser2.getUsername());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+            PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
+            Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
+            try {
+                postService.deletePostById(fixture.getPostId(), fixture.getUserName());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+            }
+
+            verify(postRepository, never()).save(any());
         }
 
-        verify(userRepository, atLeastOnce()).findByUserName(any());
-        verify(postRepository, atLeastOnce()).findById(any());
-    }
+        @Test
+        @DisplayName("포스트 삭제 실패 - 포스트 존재하지 않는 경우")
+        void notFoundPost() {
+            TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-    @Test
-    @DisplayName("포스트 수정 실패 - 유저가 존재하지 않는 경우")
-    void update_mismatchedAuthorAndUser() {
-        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+            Mockito.when(postRepository.findById(fixture.getPostId()))
+                    .thenReturn(Optional.empty());
 
-        PostEntity mockPost = mock(PostEntity.class);
-        Mockito.when(postRepository.findById(fixture.getPostId()))
-                .thenReturn(Optional.of(mockPost));
-
-        Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenReturn(Optional.empty());
-
-        PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
-        Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
-        try {
-            postService.updatePostById(fixture.getPostId(), new PostReq("title", "body"), fixture.getUserName());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+            try {
+                postService.deletePostById(fixture.getPostId(), fixture.getUserName());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+            }
         }
 
-        verify(postRepository, never()).save(any());
-    }
+        @Test
+        @DisplayName("포스트 삭제 실패 - 작성자와 유저가 일치하지 않는 경우")
+        void notFoundDeleteUser() {
+            UserEntity givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
+            UserEntity givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
+            PostEntity givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
 
-    @Test
-    @DisplayName("포스트 삭제 실패 - 유저가 존재하지 않는 경우")
-    void delete_mismatchedAuthorAndUser() {
-        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+            Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
+                    .thenReturn(Optional.of(givenUser2));
 
-        PostEntity mockPost = mock(PostEntity.class);
-        Mockito.when(postRepository.findById(fixture.getPostId()))
-                .thenReturn(Optional.of(mockPost));
+            Mockito.when(postRepository.findById(givenPost.getId()))
+                    .thenReturn(Optional.of(givenPost));
 
-        Mockito.when(userRepository.findByUserName(fixture.getUserName()))
-                .thenReturn(Optional.empty());
+            try {
+                postService.deletePostById(givenPost.getId(), givenUser2.getUsername());
+            } catch (HealingSnsAppException e) {
+                Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+            }
 
-        PostEntity givenPost = PostEntityFixture.get(fixture.getUserName(), fixture.getPassword());
-        Mockito.when(postRepository.save(any(PostEntity.class))).thenReturn(givenPost);
-        try {
-            postService.deletePostById(fixture.getPostId(), fixture.getUserName());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
-        }
-
-        verify(postRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("포스트 삭제 실패 - 포스트 존재하지 않는 경우")
-    void delete_notFoundPost() {
-        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
-
-        Mockito.when(postRepository.findById(fixture.getPostId()))
-                .thenReturn(Optional.empty());
-
-        try {
-            postService.deletePostById(fixture.getPostId(), fixture.getUserName());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+            verify(userRepository, atLeastOnce()).findByUserName(any());
+            verify(postRepository, atLeastOnce()).findById(any());
         }
     }
 
-    @Test
-    @DisplayName("포스트 삭제 실패 - 작성자와 유저가 일치하지 않는 경우")
-    void delete_notFoundEditUser() {
-        UserEntity givenUser1 = UserEntityFixture.get("user1", "password1");  // 작성자
-        UserEntity givenUser2 = UserEntityFixture.get("user2", "password2");  // 수정하고자 하는 유저
-        PostEntity givenPost = PostEntityFixture.get(givenUser1.getUsername(), givenUser1.getPassword());
-
-        Mockito.when(userRepository.findByUserName(givenUser2.getUsername()))
-                .thenReturn(Optional.of(givenUser2));
-
-        Mockito.when(postRepository.findById(givenPost.getId()))
-                .thenReturn(Optional.of(givenPost));
-
-        try {
-            postService.deletePostById(givenPost.getId(), givenUser2.getUsername());
-        } catch (HealingSnsAppException e) {
-            Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
-        }
-
-        verify(userRepository, atLeastOnce()).findByUserName(any());
-        verify(postRepository, atLeastOnce()).findById(any());
-    }
 }
