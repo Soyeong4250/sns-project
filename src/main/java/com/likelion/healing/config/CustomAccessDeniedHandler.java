@@ -3,6 +3,7 @@ package com.likelion.healing.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.likelion.healing.exception.ErrorCode;
 import com.likelion.healing.exception.ErrorResult;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Configuration
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
