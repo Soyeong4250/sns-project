@@ -1,7 +1,6 @@
 package com.likelion.healing.controller;
 
 import com.likelion.healing.domain.dto.*;
-import com.likelion.healing.domain.entity.UserRole;
 import com.likelion.healing.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -9,7 +8,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,7 +52,8 @@ public class UserController {
             @ApiResponse(code = 403, message = "접근 권한 없음"),
             @ApiResponse(code = 404, message = "일치하는 회원 이름 없음 👉 USERNAME_NOT_FOUND, 에러 메세지 반환"),
     })
-    @Secured(UserRole.Authority.ADMIN)
+
+    
     @PostMapping("/{userId}/role/change")
     public Response<UserRoleUpdateRes> updateRole(@PathVariable Integer userId, @RequestBody UserRoleUpdateReq role, Authentication authentication) {
         log.info("authentication.getAuthorities : {}", authentication.getAuthorities());
