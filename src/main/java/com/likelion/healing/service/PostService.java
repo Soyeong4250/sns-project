@@ -35,11 +35,8 @@ public class PostService {
     public PostRes createPost(PostReq postReq, String userName) {
         UserEntity user = findUserByUserName(userName);
 
-        PostEntity post = PostEntity.builder()
-                .title(postReq.getTitle())
-                .body(postReq.getBody())
-                .user(user)
-                .build();
+        PostEntity post = PostEntity.createPost(postReq.getTitle(), postReq.getBody(), user);
+
         postRepository.save(post);
         log.info("postId : {}", post.getId());
 

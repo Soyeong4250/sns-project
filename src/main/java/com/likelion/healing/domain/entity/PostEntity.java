@@ -53,6 +53,15 @@ public class PostEntity extends BaseEntity{
         this.user = user;
     }
 
+    // 정적 팩토리 메서드를 생성자로 활용
+    public static PostEntity createPost(String title, String body, UserEntity user) {
+        return PostEntity.builder()
+                .title(title)
+                .body(body)
+                .user(user)
+                .build();
+    }
+
     public void updatePost(String title, String body) {
         this.title = title;
         this.body = body;
