@@ -35,9 +35,7 @@ public class CommentService {
         UserEntity user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new HealingSnsAppException(ErrorCode.USERNAME_NOT_FOUND, String.format("%s은(는) 존재하지 않는 회원입니다", userName)));
 
-        CommentEntity commentEntity = commentReq.toEntity();
-        commentEntity.setUser(user);
-        commentEntity.setPost(post);
+        CommentEntity commentEntity = CommentEntity.createComment(commentReq.getComment(), post, user);
         commentRepository.save(commentEntity);
 
         log.info("userName : {}", user.getUserName());

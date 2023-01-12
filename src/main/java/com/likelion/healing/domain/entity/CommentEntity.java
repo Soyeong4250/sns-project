@@ -40,6 +40,15 @@ public class CommentEntity extends BaseEntity {
         this.user = user;
     }
 
+    // 정적 팩토리 메서드를 생성자로 활용
+    public static CommentEntity createComment(String comment, PostEntity post, UserEntity user) {
+        return CommentEntity.builder()
+                .comment(comment)
+                .post(post)
+                .user(user)
+                .build();
+    }
+
     public void updateComment(String comment, UserEntity user) {
         this.comment = comment;
         this.user = user;
